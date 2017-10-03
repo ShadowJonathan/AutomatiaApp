@@ -5,7 +5,8 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 
-import com.github.shadowjonathan.automatiaapp.Modules;
+import com.github.shadowjonathan.automatiaapp.background.Modules;
+import com.github.shadowjonathan.automatiaapp.global.Helper;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -13,11 +14,25 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class Category {
     public static Map<String, Category> Categories = new HashMap<String, Category>();
+    private static Map<String, String> RealNames = new HashMap<String, String>();
     private static String TAG = "CATEGORY";
+
+    static {
+        RealNames.put("anime", "Anime/Manga");
+        RealNames.put("book", "Books");
+        RealNames.put("cartoon", "Cartoons");
+        RealNames.put("game", "Games");
+        RealNames.put("misc", "Misc");
+        RealNames.put("play", "Plays/Musicals");
+        RealNames.put("movie", "Movies");
+        RealNames.put("tv", "TV");
+    }
+
     public String name;
     private Map<String, Archive> Archives;
     private Modules.FFnet ffnet;
@@ -44,6 +59,14 @@ public class Category {
         Category cat = new Category(ffnet, name);
         Categories.put(name, cat);
         return cat;
+    }
+
+    public static List<Category> getList() {
+        return new ArrayList<Category>(Categories.values());
+    }
+
+    public String getViewableName() {
+        return RealNames.get(this.name);
     }
 
     public void onMessage(JSONObject o) {

@@ -6,7 +6,10 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 
-import com.github.shadowjonathan.automatiaapp.Modules;
+import com.github.shadowjonathan.automatiaapp.background.Modules;
+import com.github.shadowjonathan.automatiaapp.global.Helper;
+import com.github.shadowjonathan.automatiaapp.global.UpdateContract;
+import com.github.shadowjonathan.automatiaapp.global.Updated;
 
 import org.json.JSONException;
 import org.json.JSONObject;

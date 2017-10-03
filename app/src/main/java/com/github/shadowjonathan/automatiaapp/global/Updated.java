@@ -1,4 +1,4 @@
-package com.github.shadowjonathan.automatiaapp.ffnet;
+package com.github.shadowjonathan.automatiaapp.global;
 
 import android.content.ContentValues;
 import android.database.Cursor;
@@ -12,7 +12,7 @@ public class Updated {
     private String regarding;
     private String ID;
 
-    Updated(String regarding, String ID) {
+    public Updated(String regarding, String ID) {
         this.regarding = regarding;
         this.ID = ID;
     }

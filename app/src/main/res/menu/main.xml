@@ -3,7 +3,17 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
         android:id="@+id/action_settings"
-        android:orderInCategory="100"
+        android:orderInCategory="1"
         android:title="@string/action_settings"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/action_debug"
+        android:orderInCategory="2"
+        android:title="@string/action_debug"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/action_ffnet"
+        android:orderInCategory="3"
+        android:title="@string/action_ffnet"
         app:showAsAction="never" />
 </menu>

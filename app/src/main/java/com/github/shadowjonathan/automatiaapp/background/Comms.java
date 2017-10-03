@@ -1,4 +1,4 @@
-package com.github.shadowjonathan.automatiaapp;
+package com.github.shadowjonathan.automatiaapp.background;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -6,10 +6,9 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
-import android.os.Handler;
-import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 
+import com.github.shadowjonathan.automatiaapp.R;
 import com.github.shadowjonathan.automatiaapp.web.WebReader;
 
 import org.java_websocket.WebSocket;
@@ -23,7 +22,7 @@ import java.net.URISyntaxException;
 import java.util.Timer;
 import java.util.TimerTask;
 
-class Comms {
+public class Comms {
     private static final URI AUTOMATIA_WS;
     private static final URI AUTOMATIA_URL;
     private static final String WSTAG = "NETWORK/WS";
@@ -50,7 +49,6 @@ class Comms {
     private Modules M;
     private ConnectivityManager cm;
     private Context app_context;
-    private Handler UIHandler;
     private boolean online;
     private Timer connect_timer = new Timer();
     private TimerTask tt = new TimerTask() {
@@ -67,8 +65,7 @@ class Comms {
 
     private MessageQueue messages;
 
-    Comms(Modules m, AppCompatActivity context, Handler UIHandler) {
-        this.UIHandler = UIHandler;
+    public Comms(Modules m, Context context) {
         app_context = context;
         cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
         M = m;
@@ -103,6 +100,39 @@ class Comms {
         connect_timer.scheduleAtFixedRate(tt, 0, 5000);
     }
 
+    private SharedPreferences getPref() {
+        return app_context.getSharedPreferences(
+                app_context.getString(R.string.comms_pref_file_key), Context.MODE_PRIVATE);
+    }
+
+    // UUID
+    private String getUUID() {
+        return getPref().getString(app_context.getString(R.string.comms_pref_UUID), "");
+    }
+
+    private void setUUID(String s) {
+        getPref().edit().putString(app_context.getString(R.string.comms_pref_UUID), s).apply();
+    }
+
+    private void sendUUID(String uuid) {
+        ws.send("{\"uuid\": \"" + uuid + "\"}");
+        this.onReady();
+    }
+
+    // NETWORK
+    private void onNetworkChange(boolean online) {
+        this.online = online;
+        if (!online) {
+            if (ws != null)
+                ws.close();
+            ws = null;
+        } else {
+            if (ws == null || ws.getReadyState() != WebSocket.READYSTATE.OPEN) {
+                newWS();
+            }
+        }
+    }
+
     private WebSocketClient newWS() {
         if (ws != null) {
             ws.close();
@@ -127,8 +157,9 @@ class Comms {
             public void onClose(int code, String reason, boolean remote) {
                 Log.d(WSTAG, "CLOSE(" + (remote ? "server" : "local") + "): " + code + " > " + reason);
                 ws = null;
-                if (code != -1)
-                    UIHandler.obtainMessage(MainActivity.CMD_TOAST, "Automatia Disconnected").sendToTarget();
+                if (code != -1) ;
+                // TODO
+                // UIHandler.obtainMessage(MainActivity.CMD_TOAST, "Automatia Disconnected").sendToTarget();
             }
 
             @Override
@@ -147,37 +178,6 @@ class Comms {
         };
         ws.connect();
         return ws;
-    }
-
-    private SharedPreferences getPref() {
-        return app_context.getSharedPreferences(
-                app_context.getString(R.string.comms_pref_file_key), Context.MODE_PRIVATE);
-    }
-
-    private String getUUID() {
-        return getPref().getString(app_context.getString(R.string.comms_pref_UUID), "");
-    }
-
-    private void setUUID(String s) {
-        getPref().edit().putString(app_context.getString(R.string.comms_pref_UUID), s).apply();
-    }
-
-    private void sendUUID(String uuid) {
-        ws.send("{\"uuid\": \"" + uuid + "\"}");
-        this.onReady();
-    }
-
-    private void onNetworkChange(boolean online) {
-        this.online = online;
-        if (!online) {
-            if (ws != null)
-                ws.close();
-            ws = null;
-        } else {
-            if (ws == null || ws.getReadyState() != WebSocket.READYSTATE.OPEN) {
-                newWS();
-            }
-        }
     }
 
     private void onMessage(String text) {
@@ -216,9 +216,15 @@ class Comms {
         messages.in(s);
     }
 
+    // ON
     private void onReady() {
         M.onReady();
         messages.flush();
-        UIHandler.obtainMessage(MainActivity.CMD_TOAST, "Automatia Connected").sendToTarget();
+        // TODO
+        // UIHandler.obtainMessage(MainActivity.CMD_TOAST, "Automatia Connected").sendToTarget();
+    }
+
+    public void onDestroy() {
+
     }
 }

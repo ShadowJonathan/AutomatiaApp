@@ -5,6 +5,10 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 
+import com.github.shadowjonathan.automatiaapp.global.DbHelper;
+import com.github.shadowjonathan.automatiaapp.global.Helper;
+import com.github.shadowjonathan.automatiaapp.global.Updated;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;

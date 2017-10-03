@@ -1,12 +1,11 @@
-package com.github.shadowjonathan.automatiaapp;
+package com.github.shadowjonathan.automatiaapp.background;
 
 import android.content.Context;
-import android.os.Handler;
 import android.util.Log;
 
 import com.github.shadowjonathan.automatiaapp.ffnet.Category;
-import com.github.shadowjonathan.automatiaapp.ffnet.DbHelper;
-import com.github.shadowjonathan.automatiaapp.ffnet.Updated;
+import com.github.shadowjonathan.automatiaapp.global.DbHelper;
+import com.github.shadowjonathan.automatiaapp.global.Updated;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -21,10 +20,8 @@ public class Modules {
     private Context app_context;
     private String FileDir;
     private String CacheDir;
-    private Handler UIHandler;
 
-    Modules(Context context, Handler UIHandler) {
-        this.UIHandler = UIHandler;
+    public Modules(Context context) {
         app_context = context;
         FileDir = app_context.getFilesDir().getParent();
         CacheDir = FileDir + "/cache";
@@ -57,10 +54,8 @@ public class Modules {
 
     public void onComms(Comms C) {
         this.C = C;
-        for (String s : new String[]{"anime", "book", "cartoon", "game", "misc", "play", "movie", "tv"}) {
-            Category.getCategory(ffnet, s);
-            Log.d(TAG, "Modules: Initialising cat " + s);
-        }
+
+        ffnet.onComms(C);
     }
 
     void onReady() {
@@ -77,6 +72,10 @@ public class Modules {
         if (DB == null)
             DB = new DbHelper(app_context);
         return DB;
+    }
+
+    public FFnet getFFnet() {
+        return ffnet;
     }
 
     public class FFnet {
@@ -143,5 +142,11 @@ public class Modules {
             }
         }
 
+        public void onComms(Comms C) {
+            for (String s : new String[]{"anime", "book", "cartoon", "game", "misc", "play", "movie", "tv"}) {
+                Category.getCategory(ffnet, s);
+                Log.d(TAG, "Initialising cat " + s);
+            }
+        }
     }
 }

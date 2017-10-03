@@ -1,10 +1,12 @@
 package com.github.shadowjonathan.automatiaapp;
 
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.ServiceConnection;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
-import android.os.Message;
+import android.os.IBinder;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -17,25 +19,39 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.EditText;
 import android.widget.Toast;
 
-/*public class MainActivity extends Activity {
-
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-    }
-}
-*/
+import com.github.shadowjonathan.automatiaapp.background.Comms;
+import com.github.shadowjonathan.automatiaapp.background.Modules;
+import com.github.shadowjonathan.automatiaapp.background.Operator;
+import com.github.shadowjonathan.automatiaapp.ffnet.select.FFNetSelectActivity;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
-    public static final int CMD_TOAST = 0;
     private static final String TAG = "ActivityActions";
+    private Operator OPS;
     private Comms C;
     private Modules M;
+    private ServiceConnection mConnection = new ServiceConnection() {
+        private String TAG = "OPS_CONN";
+
+        public void onServiceConnected(ComponentName className, IBinder service) {
+            OPS = ((Operator.LocalBinder) service).getService();
+            Log.d(TAG, "SERVICE CONNECTED");
+            M = OPS.getModules();
+            C = OPS.getComms();
+        }
+
+        public void onServiceDisconnected(ComponentName className) {
+            OPS = null;
+            Log.d(TAG, "SERVICE DISCONNECTED");
+            M = null;
+            C = null;
+        }
+    };
+    private boolean mIsBound = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -74,7 +90,11 @@ public class MainActivity extends AppCompatActivity
                     }
                 });
 
-                builder.show();
+                //builder.show();
+
+                AlertDialog dialog = builder.create();
+                dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
+                dialog.show();
             }
         });
 
@@ -88,19 +108,7 @@ public class MainActivity extends AppCompatActivity
         navigationView.setNavigationItemSelectedListener(this);
         navigationView.getMenu().getItem(0).setChecked(true);
 
-        Handler h = new Handler(Looper.getMainLooper()) {
-            @Override
-            public void handleMessage(Message message) {
-                switch (message.what) {
-                    case CMD_TOAST:
-                        Toast.makeText(MainActivity.this, message.obj.toString(), Toast.LENGTH_SHORT).show();
-                        break;
-                }
-            }
-        };
-        M = new Modules(this, h);
-        C = new Comms(M, this, h);
-        M.onComms(C);
+        doBindService();
 
         Log.d(TAG, "+++ ON CREATE +++");
     }
@@ -131,12 +139,26 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onDestroy() {
-        super.onDestroy();
         Log.d(TAG, "--- ON DESTROY ---");
+        doUnbindService();
+        super.onDestroy();
+    }
 
-        if (M != null) {
-            M.onDestroy();
-        }
+    void doBindService() {
+        startService(
+                new Intent(this, Operator.class));
+        bindService(
+                new Intent(this, Operator.class), mConnection, Context.BIND_AUTO_CREATE);
+        mIsBound = true;
+        Log.d(TAG, "Binding service...");
+    }
+
+    void doUnbindService() {
+        if (mIsBound) {
+            unbindService(mConnection);
+            mIsBound = false;
+            Log.d(TAG, "Unbinding service...");
+        } else Log.w(TAG, "doUnbindService called but no service bound");
     }
 
     @Override
@@ -166,7 +188,14 @@ public class MainActivity extends AppCompatActivity
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
             return true;
+        } else if (id == R.id.action_debug) {
+            //openDebug();
+            return true;
+        } else if (id == R.id.action_ffnet) {
+            openFFNET();
+            return true;
         }
+
 
         return super.onOptionsItemSelected(item);
     }
@@ -184,5 +213,11 @@ public class MainActivity extends AppCompatActivity
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    public void openFFNET() {
+        Intent ffnetI = new Intent(MainActivity.this, FFNetSelectActivity.class);
+        //myIntent.putExtra("key", value); //Optional parameters
+        startActivity(ffnetI);
     }
 }

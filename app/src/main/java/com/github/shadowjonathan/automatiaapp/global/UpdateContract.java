@@ -1,4 +1,4 @@
-package com.github.shadowjonathan.automatiaapp.ffnet;
+package com.github.shadowjonathan.automatiaapp.global;
 
 import android.provider.BaseColumns;
 

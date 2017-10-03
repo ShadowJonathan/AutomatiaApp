@@ -1,8 +1,12 @@
-package com.github.shadowjonathan.automatiaapp.ffnet;
+package com.github.shadowjonathan.automatiaapp.global;
 
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+
+import com.github.shadowjonathan.automatiaapp.ffnet.ArchiveContract;
+import com.github.shadowjonathan.automatiaapp.ffnet.CategoryContract;
+import com.github.shadowjonathan.automatiaapp.ffnet.RegistryContract;
 
 public class DbHelper extends SQLiteOpenHelper {
     public static final int DATABASE_VERSION = 1;

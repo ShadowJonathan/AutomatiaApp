@@ -1,4 +1,4 @@
-package com.github.shadowjonathan.automatiaapp.ffnet;
+package com.github.shadowjonathan.automatiaapp.global;
 
 import android.util.Log;
 
@@ -53,7 +53,7 @@ public final class Helper {
     public static class JSONConstructor extends JSONObject {
         private static String TAG = "JSON_CONSTRUCT";
 
-        JSONConstructor() {
+        public JSONConstructor() {
             super();
         }
 

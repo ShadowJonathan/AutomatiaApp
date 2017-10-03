@@ -1,9 +1,9 @@
-package com.github.shadowjonathan.automatiaapp;
+package com.github.shadowjonathan.automatiaapp.background;
 
 
 import java.util.Stack;
 
-abstract class MessageQueue {
+public abstract class MessageQueue {
     private Stack<Object> queue = new Stack<Object>();
 
     public abstract boolean condition();
