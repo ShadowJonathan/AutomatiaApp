@@ -3,6 +3,7 @@ package com.github.shadowjonathan.automatiaapp.ffnet;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.support.annotation.NonNull;
 import android.util.Log;
 
 import com.github.shadowjonathan.automatiaapp.background.Modules;
@@ -13,6 +14,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -59,6 +61,13 @@ public class Category {
         Category cat = new Category(ffnet, name);
         Categories.put(name, cat);
         return cat;
+    }
+
+    public static Category getCategory(String name) {
+        if (Categories.containsKey(name))
+            return Categories.get(name);
+        else
+            return null;
     }
 
     public static List<Category> getList() {
@@ -136,6 +145,45 @@ public class Category {
         return ArchiveNames;
     }
 
+    public ArrayList<ArchiveRef> getArchives() {
+        SQLiteDatabase db = ffnet.getDB().getReadableDatabase();
+
+        String[] projection = {
+                CategoryContract.CatEntry._ID,
+                CategoryContract.CatEntry.COLUMN_NAME_CATAGORY,
+                CategoryContract.CatEntry.COLUMN_NAME_NAME,
+                CategoryContract.CatEntry.COLUMN_NAME_URL,
+                CategoryContract.CatEntry.COLUMN_NAME_LEN,
+        };
+        String selection = CategoryContract.CatEntry.COLUMN_NAME_CATAGORY + " = ?";
+        String[] selectionArgs = {this.name};
+
+        Cursor cursor = db.query(
+                CategoryContract.CatEntry.TABLE_NAME,
+                projection,
+                selection,
+                selectionArgs,
+                null,
+                null,
+                null
+        );
+
+        ArrayList<ArchiveRef> Archives = new ArrayList<ArchiveRef>();
+        while (cursor.moveToNext()) {
+            Archives.add(new ArchiveRef(
+                            cursor.getString(cursor.getColumnIndex(CategoryContract.CatEntry.COLUMN_NAME_URL)),
+
+                            cursor.getString(cursor.getColumnIndex(CategoryContract.CatEntry.COLUMN_NAME_NAME)),
+
+                            cursor.getInt(cursor.getColumnIndex(CategoryContract.CatEntry.COLUMN_NAME_LEN))
+                    )
+            );
+        }
+        cursor.close();
+        Collections.sort(Archives);
+        return Archives;
+    }
+
     private void processArchives(JSONArray a) throws JSONException {
         ArrayList<JSONObject> list = Helper.makeObjects(a);
         SQLiteDatabase db = ffnet.getDB().getWritableDatabase();
@@ -185,5 +233,22 @@ public class Category {
             return Archives.get(name);
         else
             return null;
+    }
+
+    public class ArchiveRef implements Comparable<ArchiveRef> {
+        public String url;
+        public String name;
+        public int len;
+
+        ArchiveRef(String url, String name, int len) {
+            this.url = url;
+            this.name = name;
+            this.len = len;
+        }
+
+        @Override
+        public int compareTo(@NonNull ArchiveRef archiveRef) {
+            return archiveRef.len - this.len;
+        }
     }
 }

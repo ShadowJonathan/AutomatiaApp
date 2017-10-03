@@ -9,7 +9,7 @@ import android.widget.Toast;
 import com.github.shadowjonathan.automatiaapp.R;
 import com.github.shadowjonathan.automatiaapp.ffnet.Category;
 
-public class FFNetSelectActivity extends AppCompatActivity implements CategoryFragment.OnCategoryTapListener {
+public class FFNetSelectActivity extends AppCompatActivity implements CategoryFragment.OnCategoryTapListener, ArchiveFragment.OnArchiveTapListener {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,6 +32,7 @@ public class FFNetSelectActivity extends AppCompatActivity implements CategoryFr
         switch (item.getItemId()) {
             case android.R.id.home:
                 onBackPressed();
+                ((Toolbar) findViewById(R.id.toolbar)).setTitle(R.string.title_activity_ffnet_main);
                 return true;
         }
 
@@ -40,16 +41,19 @@ public class FFNetSelectActivity extends AppCompatActivity implements CategoryFr
 
     @Override
     public void onCTap(Category item) {
-        /*
-        final RageComicDetailsFragment detailsFragment =
-                RageComicDetailsFragment.newInstance(imageResId, na me, descri ption, url);
+        final ArchiveFragment aFrag =
+                ArchiveFragment.newInstance(item);
 
         getSupportFragmentManager()
                 .beginTransaction()
-                .replace(R.id.root_layout, detailsFragment, "rageComicDetails")
+                .replace(R.id.root_layout, aFrag, "rageComicDetails")
                 .addToBackStack(null)
                 .commit();
-                */
+        ((Toolbar) findViewById(R.id.toolbar)).setTitle(item.getViewableName());
+    }
+
+    @Override
+    public void onATap(Category.ArchiveRef item) {
         Toast.makeText(this, "Selected " + item.name, Toast.LENGTH_SHORT).show();
     }
 }
