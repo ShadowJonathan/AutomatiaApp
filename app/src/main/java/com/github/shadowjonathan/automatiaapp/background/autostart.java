@@ -18,7 +18,7 @@ public class autostart extends BroadcastReceiver {
 
     public void onReceive(Context context, Intent i) {
         this.context = context;
-        if (getPref().getBoolean(context.getString(R.string.boot_pref), false)) {
+        if (getPref().getBoolean(context.getString(R.string.boot_pref), true)) {
             Intent intent = new Intent(context, Operator.class);
             context.startService(intent);
             Log.i("Autostart", "started");

@@ -4,7 +4,8 @@ import android.content.Context;
 import android.util.Log;
 
 import com.github.shadowjonathan.automatiaapp.ffnet.Category;
-import com.github.shadowjonathan.automatiaapp.global.DbHelper;
+import com.github.shadowjonathan.automatiaapp.ffnet.FFnetDBHelper;
+import com.github.shadowjonathan.automatiaapp.global.GlobalDBhelper;
 import com.github.shadowjonathan.automatiaapp.global.Updated;
 
 import org.json.JSONException;
@@ -14,7 +15,7 @@ import static com.github.shadowjonathan.automatiaapp.ffnet.Category.Categories;
 
 public class Modules {
     private static String TAG = "MODULES";
-    protected DbHelper DB;
+    protected GlobalDBhelper GDB;
     private FFnet ffnet;
     private Comms C;
     private Context app_context;
@@ -25,7 +26,7 @@ public class Modules {
         app_context = context;
         FileDir = app_context.getFilesDir().getParent();
         CacheDir = FileDir + "/cache";
-        Updated.bindDB(getDB());
+        Updated.bindDB(getGDB());
 
         ffnet = new FFnet();
     }
@@ -63,15 +64,16 @@ public class Modules {
     }
 
     void onDestroy() {
-        if (DB != null) {
-            DB.close();
+        ffnet.onDestroy();
+        if (GDB != null) {
+            GDB.close();
         }
     }
 
-    public DbHelper getDB() {
-        if (DB == null)
-            DB = new DbHelper(app_context);
-        return DB;
+    public GlobalDBhelper getGDB() {
+        if (GDB == null)
+            GDB = new GlobalDBhelper(app_context);
+        return GDB;
     }
 
     public FFnet getFFnet() {
@@ -79,6 +81,7 @@ public class Modules {
     }
 
     public class FFnet {
+        protected FFnetDBHelper DB;
         private String TAG = "MODULES.FFNET";
         /*
         private File stories;
@@ -107,8 +110,10 @@ public class Modules {
             return app_context;
         }
 
-        public DbHelper getDB() {
-            return Modules.this.getDB();
+        public FFnetDBHelper getDB() {
+            if (DB == null)
+                DB = new FFnetDBHelper(app_context);
+            return DB;
         }
 
         void onMessage(JSONObject o) {
@@ -146,6 +151,12 @@ public class Modules {
             for (String s : new String[]{"anime", "book", "cartoon", "game", "misc", "play", "movie", "tv"}) {
                 Category.getCategory(ffnet, s);
                 Log.d(TAG, "Initialising cat " + s);
+            }
+        }
+
+        public void onDestroy() {
+            if (DB != null) {
+                DB.close();
             }
         }
     }

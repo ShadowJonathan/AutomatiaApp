@@ -1,5 +1,7 @@
 package com.github.shadowjonathan.automatiaapp.global;
 
+import android.content.Context;
+import android.graphics.Color;
 import android.util.Log;
 
 import org.json.JSONArray;
@@ -132,6 +134,13 @@ public final class Helper {
     }
 
     public static class TSUtils {
+        public final static long ONE_SECOND = 1000;
+        public final static long SECONDS = 60;
+        public final static long ONE_MINUTE = ONE_SECOND * 60;
+        public final static long MINUTES = 60;
+        public final static long ONE_HOUR = ONE_MINUTE * 60;
+        public final static long HOURS = 24;
+        public final static long ONE_DAY = ONE_HOUR * 24;
         private TSUtils() {
         }
 
@@ -139,6 +148,88 @@ public final class Helper {
             DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.UK);
             dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
             return dateFormat.format(date);
+        }
+
+        /**
+         * converts time (in milliseconds) to human-readable format
+         * "<w> days, <x> hours, <y> minutes and (z) seconds"
+         */
+        public static String millisToLongDHMS(long duration) {
+            StringBuilder res = new StringBuilder();
+            long temp = 0;
+            if (duration >= ONE_SECOND) {
+                temp = duration / ONE_DAY;
+                if (temp > 0) {
+                    duration -= temp * ONE_DAY;
+                    res.append(temp).append(" day").append(temp > 1 ? "s" : "")
+                            .append(duration >= ONE_MINUTE ? ", " : "");
+                }
+
+                temp = duration / ONE_HOUR;
+                if (temp > 0) {
+                    duration -= temp * ONE_HOUR;
+                    res.append(temp).append(" hour").append(temp > 1 ? "s" : "")
+                            .append(duration >= ONE_MINUTE ? ", " : "");
+                }
+
+                temp = duration / ONE_MINUTE;
+                if (temp > 0) {
+                    duration -= temp * ONE_MINUTE;
+                    res.append(temp).append(" minute").append(temp > 1 ? "s" : "");
+                }
+
+                if (!res.toString().equals("") && duration >= ONE_SECOND) {
+                    res.append(" and ");
+                }
+
+                temp = duration / ONE_SECOND;
+                if (temp > 0) {
+                    res.append(temp).append(" second").append(temp > 1 ? "s" : "");
+                }
+                return res.toString();
+            } else {
+                return "0 seconds";
+            }
+        }
+
+        /**
+         * converts time (in milliseconds) to human-readable format
+         * "<dd:>hh:mm:ss"
+         */
+        public static String millisToShortDHMS(long duration) {
+            String res = "";
+            duration /= ONE_SECOND;
+            int seconds = (int) (duration % SECONDS);
+            duration /= SECONDS;
+            int minutes = (int) (duration % MINUTES);
+            duration /= MINUTES;
+            int hours = (int) (duration % HOURS);
+            int days = (int) (duration / HOURS);
+            if (days == 0) {
+                res = String.format("%02d:%02d:%02d", hours, minutes, seconds);
+            } else {
+                res = String.format("%dd%02d:%02d:%02d", days, hours, minutes, seconds);
+            }
+            return res;
+        }
+    }
+
+    public static class Notification {
+        private Notification() {
+        }
+
+        public static android.app.Notification.Builder base(Context context) {
+            return new android.app.Notification.Builder(context)
+                    .setColor(Color.GREEN)
+                    ;
+        }
+
+        public static android.app.Notification.Builder perm(Context context) {
+            return base(context)
+                    .setPriority(android.app.Notification.PRIORITY_MIN)
+                    .setCategory(android.app.Notification.CATEGORY_SERVICE)
+                    .setOngoing(true)
+                    ;
         }
     }
 }

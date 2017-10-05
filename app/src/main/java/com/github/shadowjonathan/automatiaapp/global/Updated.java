@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.Date;
 
 public class Updated {
-    private static DbHelper DB;
+    private static GlobalDBhelper DB;
     private String regarding;
     private String ID;
 
@@ -17,7 +17,7 @@ public class Updated {
         this.ID = ID;
     }
 
-    public static void bindDB(DbHelper db) {
+    public static void bindDB(GlobalDBhelper db) {
         DB = db;
     }
 

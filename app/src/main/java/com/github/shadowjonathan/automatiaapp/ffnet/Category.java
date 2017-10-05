@@ -188,9 +188,12 @@ public class Category {
         ArrayList<JSONObject> list = Helper.makeObjects(a);
         SQLiteDatabase db = ffnet.getDB().getWritableDatabase();
         Log.d(TAG, this.name + ": processArchives: Processing...");
+        db.beginTransaction();
         for (JSONObject o : list) {
             processOneArchive(o, db);
         }
+        db.setTransactionSuccessful();
+        db.endTransaction();
         Log.d(TAG, this.name + ": processArchives: Processed Archives!");
     }
 

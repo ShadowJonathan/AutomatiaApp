@@ -13,9 +13,11 @@
     <string name="action_ffnet">Open FFNet</string>
 
     <string name="comms_pref_file_key">AUTOMATIA_COMMS_PREF</string>
-
+    <string name="comms_pref_notification">AUTOMATIA_COMMS_NOTIFICATION</string>
     <string name="comms_pref_UUID">AUTOMATIA_COMMS_UUID</string>
+
     <string name="boot_pref">AUTOMATIA_BOOT_PREF</string>
+
     <string name="title_activity_debug">DebugActivity</string>
 
     <string name="DEBUG_TEST">TEST</string>
@@ -93,4 +95,5 @@
 
     <string name="pref_title_vibrate">Vibrate</string>
     <string name="title_activity_ffnet_main">Fanfiction.net</string>
+    <string name="menu_search">Search</string>
 </resources>

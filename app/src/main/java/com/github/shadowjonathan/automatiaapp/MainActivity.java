@@ -26,7 +26,7 @@ import android.widget.Toast;
 import com.github.shadowjonathan.automatiaapp.background.Comms;
 import com.github.shadowjonathan.automatiaapp.background.Modules;
 import com.github.shadowjonathan.automatiaapp.background.Operator;
-import com.github.shadowjonathan.automatiaapp.ffnet.select.FFNetSelectActivity;
+import com.github.shadowjonathan.automatiaapp.ffnet.select.FFNetCategorySelectActivity;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -216,8 +216,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     public void openFFNET() {
-        Intent ffnetI = new Intent(MainActivity.this, FFNetSelectActivity.class);
-        //myIntent.putExtra("key", value); //Optional parameters
+        Intent ffnetI = new Intent(MainActivity.this, FFNetCategorySelectActivity.class);
         startActivity(ffnetI);
     }
 }

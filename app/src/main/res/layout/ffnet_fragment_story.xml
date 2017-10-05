@@ -1,0 +1,279 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:weightSum="1">
+    <!-- A CardView that contains a TextView -->
+    <!--suppress AndroidDomInspection -->
+    <android.support.v7.widget.CardView xmlns:card_view="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/card_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_margin="5dp"
+        android:layout_weight="0.98"
+        android:foreground="?selectableItemBackground"
+        card_view:cardCornerRadius="5dp"
+        card_view:cardElevation="5dp">
+
+        <!--
+        <TextView
+            android:id="@+id/content"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_margin="10dp"
+            android:text="Harry Potter"
+            android:textAppearance="@style/TextAppearance.AppCompat.Light.SearchResult.Subtitle" />
+
+        <TextView
+            android:id="@+id/len"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_margin="10dp"
+            android:gravity="right"
+            android:text="19"
+            android:textAppearance="@style/TextAppearance.AppCompat.Small" />-->
+
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/story_title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="10dp"
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="10dp"
+                android:layout_marginStart="10dp"
+                android:layout_marginTop="10dp"
+                android:gravity="left"
+                android:text="Phantom's Sketchbook"
+                android:textAppearance="@style/TextAppearance.AppCompat.Title" />
+
+            <TextView
+                android:id="@+id/story_author"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="10dp"
+                android:text="by AkoyaMizuno" />
+
+            <TextView
+                android:id="@+id/story_summary"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="10dp"
+                android:text="Mr. Lancer finds himself in an unparalleled situation, he has access to something which can give him incredable insight into the personal workings of Amity Park's local ghost teen hero, Danny Phantom. COMPLETE!" />
+
+            <TableLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:paddingBottom="5dp">
+
+                <TableRow
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:paddingBottom="5dp"
+                    android:paddingLeft="5dp"
+                    android:paddingRight="5dp">
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content">
+
+                            <ImageView
+                                android:id="@+id/fav_star"
+                                android:layout_width="21sp"
+                                android:layout_height="21sp"
+                                android:layout_marginLeft="5dp"
+                                android:layout_marginRight="5dp"
+                                android:adjustViewBounds="false"
+                                android:tint="#aaa"
+                                app:srcCompat="@drawable/ic_star" />
+
+                            <TextView
+                                android:id="@+id/fav_len"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="3.4k"
+                                android:textSize="17sp" />
+
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginLeft="10dp">
+
+                            <ImageView
+                                android:id="@+id/fol_bell"
+                                android:layout_width="21sp"
+                                android:layout_height="21sp"
+                                android:layout_marginLeft="5dp"
+                                android:layout_marginRight="5dp"
+                                android:adjustViewBounds="false"
+                                android:tint="#aaa"
+                                app:srcCompat="@drawable/ic_notifications" />
+
+                            <TextView
+                                android:id="@+id/fol_len"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="739"
+                                android:textSize="17sp" />
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginLeft="10dp">
+
+                            <ImageView
+                                android:id="@+id/pub_arrow"
+                                android:layout_width="21sp"
+                                android:layout_height="21sp"
+                                android:layout_marginLeft="5dp"
+                                android:layout_marginRight="5dp"
+                                android:adjustViewBounds="false"
+                                android:tint="#aaa"
+                                app:srcCompat="@drawable/ic_publish" />
+
+                            <TextView
+                                android:id="@+id/pub_when"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="May 21, 2006"
+                                android:textSize="17sp" />
+                        </LinearLayout>
+
+                    </LinearLayout>
+
+                </TableRow>
+
+                <TableRow
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingBottom="5dp"
+                    android:paddingLeft="5dp"
+                    android:paddingStart="5dp">
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content">
+
+                            <ImageView
+                                android:id="@+id/rev_mess"
+                                android:layout_width="21sp"
+                                android:layout_height="21sp"
+                                android:layout_marginLeft="5dp"
+                                android:layout_marginRight="5dp"
+                                android:adjustViewBounds="false"
+                                android:tint="#aaa"
+                                app:srcCompat="@drawable/ic_sms" />
+
+                            <TextView
+                                android:id="@+id/rev_len"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="1.1k"
+                                android:textSize="17sp" />
+
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginLeft="10dp">
+
+                            <ImageView
+                                android:id="@+id/words_quote"
+                                android:layout_width="21sp"
+                                android:layout_height="21sp"
+                                android:layout_marginLeft="5dp"
+                                android:layout_marginRight="5dp"
+                                android:adjustViewBounds="false"
+                                android:tint="#aaa"
+                                app:srcCompat="@drawable/ic_quote" />
+
+                            <TextView
+                                android:id="@+id/words_len"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="20.8k"
+                                android:textSize="17sp" />
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginLeft="10dp">
+
+                            <ImageView
+                                android:id="@+id/up_clock"
+                                android:layout_width="21sp"
+                                android:layout_height="21sp"
+                                android:layout_marginLeft="5dp"
+                                android:layout_marginRight="5dp"
+                                android:adjustViewBounds="false"
+                                android:tint="#aaa"
+                                app:srcCompat="@drawable/ic_update" />
+
+                            <TextView
+                                android:id="@+id/up_when"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Oct 6, 2006"
+                                android:textSize="17sp" />
+                        </LinearLayout>
+
+                    </LinearLayout>
+
+                </TableRow>
+
+            </TableLayout>
+
+        </LinearLayout>
+
+        <ImageView
+            android:id="@+id/imageView2"
+            android:layout_width="21sp"
+            android:layout_height="21sp"
+            android:layout_gravity="end|bottom"
+            android:layout_marginBottom="5dp"
+            android:layout_marginRight="5dp"
+            android:adjustViewBounds="false"
+            android:tint="#A4C439"
+            app:srcCompat="@drawable/ic_done" />
+
+        <ImageButton
+            android:id="@+id/more"
+            android:layout_width="30dp"
+            android:layout_height="40dp"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentRight="true"
+            android:layout_below="@+id/item_detail"
+            android:layout_gravity="right"
+            android:layout_marginTop="3dp"
+            android:adjustViewBounds="true"
+            android:background="@null"
+            android:src="@drawable/ic_more"
+            android:tint="#999" />
+
+    </android.support.v7.widget.CardView>
+
+</LinearLayout>

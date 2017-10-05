@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,16 +15,16 @@ import com.github.shadowjonathan.automatiaapp.R;
 import com.github.shadowjonathan.automatiaapp.ffnet.Category;
 import com.github.shadowjonathan.automatiaapp.global.Helper;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class ArchiveFragment extends Fragment {
 
-    // TODO: Customize parameter argument names
     private static final String ARG_PARENT_CAT = "category";
-    // TODO: Customize parameters
-    //private int mColumnCount = 1;
+    private static String TAG = "AR_frag";
     public Category parentCategory;
     private OnArchiveTapListener mListener;
+    private CategoryRecyclerAdapter CRA;
 
     public ArchiveFragment() {
     }
@@ -54,7 +55,8 @@ public class ArchiveFragment extends Fragment {
             Context context = view.getContext();
             RecyclerView recyclerView = (RecyclerView) view;
             recyclerView.setLayoutManager(new LinearLayoutManager(context));
-            recyclerView.setAdapter(new CategoryRecyclerAdapter(parentCategory.getArchives(), mListener));
+            CRA = new CategoryRecyclerAdapter(parentCategory.getArchives(), mListener);
+            recyclerView.setAdapter(CRA);
         }
 
         return view;
@@ -79,17 +81,23 @@ public class ArchiveFragment extends Fragment {
         mListener = null;
     }
 
+    public void filter(String s) {
+        CRA.filter(s);
+    }
+
     public interface OnArchiveTapListener {
         void onATap(Category.ArchiveRef item);
     }
 
     public static class CategoryRecyclerAdapter extends RecyclerView.Adapter<CategoryRecyclerAdapter.ViewHolder> {
 
-        private final List<Category.ArchiveRef> mValues;
+        private final List<Category.ArchiveRef> allValues;
         private final OnArchiveTapListener mListener;
+        private List<Category.ArchiveRef> mValues;
 
         public CategoryRecyclerAdapter(List<Category.ArchiveRef> items, OnArchiveTapListener listener) {
             mValues = items;
+            allValues = new ArrayList<Category.ArchiveRef>(items);
             mListener = listener;
         }
 
@@ -124,6 +132,19 @@ public class ArchiveFragment extends Fragment {
             return mValues.size();
         }
 
+        public void filter(String s) {
+            s = s.toLowerCase();
+            mValues.clear();
+            for (Category.ArchiveRef a : allValues) {
+                if (a.name.toLowerCase().contains(s)) {
+                    mValues.add(a);
+                }
+            }
+            notifyDataSetChanged();
+
+            Log.d(TAG, "filtering '" + s + String.format("'... (%d/%d)", mValues.size(), allValues.size()));
+        }
+
         public class ViewHolder extends RecyclerView.ViewHolder {
             public final View mView;
             public final TextView mContentView;
@@ -133,8 +154,8 @@ public class ArchiveFragment extends Fragment {
             public ViewHolder(View view) {
                 super(view);
                 mView = view;
-                mContentView = view.findViewById(R.id.content);
-                mAmountView = view.findViewById(R.id.len);
+                mContentView = (TextView) view.findViewById(R.id.content);
+                mAmountView = (TextView) view.findViewById(R.id.len);
             }
 
             @Override

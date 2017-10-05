@@ -8,7 +8,6 @@ import android.util.Log;
 
 import com.github.shadowjonathan.automatiaapp.background.Modules;
 import com.github.shadowjonathan.automatiaapp.global.Helper;
-import com.github.shadowjonathan.automatiaapp.global.UpdateContract;
 import com.github.shadowjonathan.automatiaapp.global.Updated;
 
 import org.json.JSONException;
@@ -23,8 +22,8 @@ public class Archive {
     private static Map<String, Archive> Archives;
     private static String TAG = "ARCHIVE";
     public String name;
+    public Registry reg;
     private Category Cat;
-    private Registry reg;
     private Modules.FFnet ffnet;
     private Updated u;
 
@@ -49,7 +48,13 @@ public class Archive {
         Category Cat = Categories.get(cat);
         if (!Cat.hasArchive(name))
             return null;
-        return Cat.registerArchive(name);
+        Archive a = Cat.registerArchive(name);
+        Archives.put(a.makeID(), a);
+        return a;
+    }
+
+    public static Archive getArchive(String ID) {
+        return Archives.get(ID);
     }
 
     private Helper.JSONConstructor getBase() {
@@ -121,7 +126,7 @@ public class Archive {
 
     public ArchiveInfo getInfo() {
         Cursor cursor = ffnet.getDB().getReadableDatabase().query(
-                UpdateContract.UdEntry.TABLE_NAME,
+                ArchiveContract.ArchEntry.TABLE_NAME,
                 new String[]{
                         ArchiveContract.ArchEntry.COLUMN_NAME_ARCHIVE,
                         ArchiveContract.ArchEntry.COLUMN_NAME_NAME,
@@ -140,6 +145,10 @@ public class Archive {
         cursor.close();
 
         return ai;
+    }
+
+    public String makeID() {
+        return Cat.name.toLowerCase() + ">" + this.name.toLowerCase();
     }
 
     public class ArchiveInfo {

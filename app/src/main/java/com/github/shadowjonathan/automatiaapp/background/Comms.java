@@ -1,14 +1,18 @@
 package com.github.shadowjonathan.automatiaapp.background;
 
+import android.app.Notification;
+import android.app.NotificationManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
+import android.text.format.DateUtils;
 import android.util.Log;
 
 import com.github.shadowjonathan.automatiaapp.R;
+import com.github.shadowjonathan.automatiaapp.global.Helper;
 import com.github.shadowjonathan.automatiaapp.web.WebReader;
 
 import org.java_websocket.WebSocket;
@@ -19,6 +23,8 @@ import org.json.JSONObject;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -26,6 +32,7 @@ public class Comms {
     private static final URI AUTOMATIA_WS;
     private static final URI AUTOMATIA_URL;
     private static final String WSTAG = "NETWORK/WS";
+    private static final int online_n_id = 9001;
 
     static {
         URI tmp = null;
@@ -45,6 +52,8 @@ public class Comms {
         AUTOMATIA_URL = tmp;
     }
 
+    private Date latestOnline;
+    private Date latestOffline;
     private WebSocketClient ws;
     private Modules M;
     private ConnectivityManager cm;
@@ -54,6 +63,7 @@ public class Comms {
     private TimerTask tt = new TimerTask() {
         @Override
         public void run() {
+            updateNotification();
             if (online && (ws == null || ws.getReadyState() == WebSocket.READYSTATE.CLOSED)) {
                 Log.i(WSTAG, "Found dead network link, trying to restart it...");
                 newWS();
@@ -98,6 +108,7 @@ public class Comms {
         context.registerReceiver(br, filter);
 
         connect_timer.scheduleAtFixedRate(tt, 0, 5000);
+        updateNotification();
     }
 
     private SharedPreferences getPref() {
@@ -112,6 +123,7 @@ public class Comms {
 
     private void setUUID(String s) {
         getPref().edit().putString(app_context.getString(R.string.comms_pref_UUID), s).apply();
+        updateNotification();
     }
 
     private void sendUUID(String uuid) {
@@ -119,8 +131,52 @@ public class Comms {
         this.onReady();
     }
 
+    private Notification.Builder makeBaseNotification() {
+        // TODO DEP?
+        return Helper.Notification.perm(app_context)
+                .setSubText("Communication")
+                ;
+    }
+
+    private void updateNotification() {
+        if (getPref().getBoolean(app_context.getString(R.string.comms_pref_notification), true))
+            ((NotificationManager) app_context.getSystemService(Context.NOTIFICATION_SERVICE))
+                    .notify(online_n_id,
+                            makeBaseNotification()
+                                    .setSmallIcon(this.isOnline() ? R.drawable.ic_wifi : R.drawable.ic_wifi_off)
+                                    .setContentTitle(this.isOnline() ? "Online" : "Offline")
+                                    .setContentText(
+                                            this.online ?
+                                                    "For " + Helper.TSUtils.millisToLongDHMS(new Date().getTime() - latestOffline.getTime()) :
+                                                    // "(UUID: " + getUUID() + ")"
+                                                    latestOnline == null ?
+                                                            null :
+                                                            "For " + Helper.TSUtils.millisToLongDHMS(new Date().getTime() - latestOnline.getTime()) +
+                                                                    (DateUtils.isToday(new Date().getTime()) ?
+                                                                            (" (since " + new SimpleDateFormat("HH:mm").format(latestOnline) + ")") :
+                                                                            (" (since " + new SimpleDateFormat("MM/dd HH:mm").format(latestOnline) + ")")
+                                                                    )
+                                    )
+                                    .build()
+                    );
+        Log.v("COMMS_NOTIFICATION", (this.isOnline() ? "Online" : "Offline") + " | "
+                + (this.isOnline() ?
+                "For " + Helper.TSUtils.millisToLongDHMS(new Date().getTime() - latestOffline.getTime()) : // "(UUID: " + getUUID() + ")"
+                latestOnline == null ?
+                        null :
+                        "For " + Helper.TSUtils.millisToLongDHMS(new Date().getTime() - latestOnline.getTime()) +
+                                (DateUtils.isToday(new Date().getTime()) ?
+                                        (" (since " + new SimpleDateFormat("HH:mm").format(latestOnline) + ")") :
+                                        (" (since " + new SimpleDateFormat("MM/dd HH:mm").format(latestOnline) + ")")
+                                )));
+    }
+
     // NETWORK
     private void onNetworkChange(boolean online) {
+        if (this.online != online) {
+            if (!this.online)
+                latestOffline = new Date();
+        }
         this.online = online;
         if (!online) {
             if (ws != null)
@@ -131,6 +187,11 @@ public class Comms {
                 newWS();
             }
         }
+        updateNotification();
+    }
+
+    private boolean isOnline() {
+        return this.online && ws != null;
     }
 
     private WebSocketClient newWS() {
@@ -151,6 +212,7 @@ public class Comms {
                 else
                     Log.d(WSTAG, "IN: " + message);
                 Comms.this.onMessage(message);
+                latestOnline = new Date();
             }
 
             @Override

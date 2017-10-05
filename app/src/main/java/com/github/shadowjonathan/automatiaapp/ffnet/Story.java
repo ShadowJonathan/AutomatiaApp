@@ -6,9 +6,15 @@ import java.util.regex.Pattern;
 
 public class Story {
     private static Map<String, Story> Stories;
-    private String ID;
+    public String ID;
+    public Archive from;
 
     Story(String ID) {
+        this.ID = ID;
+    }
+
+    Story(String ID, Archive a) {
+        from = a;
         this.ID = ID;
     }
 

@@ -23,7 +23,7 @@
         </activity>
 
         <activity
-            android:name=".ffnet.select.FFNetSelectActivity"
+            android:name=".ffnet.select.FFNetCategorySelectActivity"
             android:label="@string/title_activity_ffnet_main"
             android:parentActivityName=".MainActivity"
             android:theme="@style/AppTheme">
@@ -32,9 +32,22 @@
                 android:value="com.github.shadowjonathan.automatiaapp.MainActivity" />
         </activity>
 
+        <activity
+            android:name=".ffnet.select.FFNetArchiveSelectActivity"
+            android:label="@string/title_activity_ffnet_main"
+            android:parentActivityName=".MainActivity"
+            android:theme="@style/AppTheme">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".ffnet.select.FFNetCategorySelectActivity" />
+        </activity>
+
         <receiver android:name=".background.autostart">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.QUICKBOOT_POWERON" />
+                <action android:name="android.intent.action.REBOOT" />
+                <action android:name="com.htc.intent.action.QUICKBOOT_POWERON" />
             </intent-filter>
         </receiver>
 

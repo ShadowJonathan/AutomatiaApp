@@ -5,7 +5,6 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 
-import com.github.shadowjonathan.automatiaapp.global.DbHelper;
 import com.github.shadowjonathan.automatiaapp.global.Helper;
 import com.github.shadowjonathan.automatiaapp.global.Updated;
 
@@ -19,21 +18,32 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 public class Registry {
     private static String TAG = "REGISTRY";
     private Archive forArchive;
-    private DbHelper db;
+    private FFnetDBHelper db;
     private Updated u;
 
-    Registry(Archive a, DbHelper db) {
+    Registry(Archive a, FFnetDBHelper db) {
         forArchive = a;
         this.db = db;
         u = new Updated("registry", a.name);
     }
 
-    RegistryList getList() {
-        return new RegistryList(db);
+    public static RegistryEntry requestStorySearch(String ID, FFnetDBHelper db) {
+        Log.d(TAG, "requestStorySearch: LOOKING FOR STORY WITH '" + ID + "'");
+        for (RegistryEntry re : new RegistryList(db, null)) {
+            if (Objects.equals(re.storyID, ID))
+                return re;
+        }
+        Log.d(TAG, "requestStorySearch: CANT FIND '" + ID + "'");
+        return null;
+    }
+
+    public RegistryList getList() {
+        return new RegistryList(db, forArchive);
     }
 
     public void process(JSONArray a) {
@@ -70,8 +80,8 @@ public class Registry {
         }
     }
 
-    public class RegistryList extends ArrayList<RegistryEntry> {
-        RegistryList(DbHelper db) {
+    public static class RegistryList extends ArrayList<RegistryEntry> {
+        RegistryList(FFnetDBHelper db, Archive forArchive) {
             SQLiteDatabase Db = db.getReadableDatabase();
 
             String[] projection = {
@@ -79,8 +89,13 @@ public class Registry {
                     RegistryContract.RegEntry.COLUMN_NAME_ARCHIVE,
                     RegistryContract.RegEntry.COLUMN_NAME_DATA,
             };
-            String selection = RegistryContract.RegEntry.COLUMN_NAME_ARCHIVE + " = ?";
-            String[] selectionArgs = {forArchive.name};
+
+            String selection = null;
+            String[] selectionArgs = null;
+            if (forArchive != null) {
+                selection = RegistryContract.RegEntry.COLUMN_NAME_ARCHIVE + " = ?";
+                selectionArgs = new String[]{forArchive.name};
+            }
 
             Cursor cursor = Db.query(
                     CategoryContract.CatEntry.TABLE_NAME,
@@ -112,7 +127,9 @@ public class Registry {
         }
     }
 
-    public class RegistryEntry {
+    public static class RegistryEntry {
+        public String archive;
+
         public String rating;
         public Date updated;
         public int words;
@@ -139,6 +156,8 @@ public class Registry {
         RegistryEntry(Cursor cursor) throws JSONException {
             String data = cursor.getString(cursor.getColumnIndex(RegistryContract.RegEntry.COLUMN_NAME_DATA));
             JSONObject o = new JSONObject(data);
+
+            archive = cursor.getString(cursor.getColumnIndex(RegistryContract.RegEntry.COLUMN_NAME_ARCHIVE));
 
             if (o.has("rating"))
                 rating = o.getString("rating");

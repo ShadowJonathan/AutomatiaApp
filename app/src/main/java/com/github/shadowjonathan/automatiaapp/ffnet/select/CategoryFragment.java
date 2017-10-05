@@ -23,11 +23,6 @@ import java.util.List;
  */
 public class CategoryFragment extends Fragment {
 
-    // TODO: Customize parameter argument names
-    //private static final String ARG_COLUMN_COUNT = "column-count";
-    // TODO: Customize parameters
-    //private int mColumnCount = 1;
-
     private OnCategoryTapListener mListener;
 
     public CategoryFragment() {
@@ -135,7 +130,7 @@ public class CategoryFragment extends Fragment {
             public ViewHolder(View view) {
                 super(view);
                 mView = view;
-                mContentView = view.findViewById(R.id.content);
+                mContentView = (TextView) view.findViewById(R.id.content);
             }
 
             @Override
