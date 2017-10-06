@@ -18,6 +18,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class Category {
     public static Map<String, Category> Categories = new HashMap<String, Category>();
@@ -36,7 +38,7 @@ public class Category {
     }
 
     public String name;
-    private Map<String, Archive> Archives;
+    private Map<String, Archive> Archives = new HashMap<String, Archive>();
     private Modules.FFnet ffnet;
     private ArrayList<String> ArchiveNames;
 
@@ -105,9 +107,12 @@ public class Category {
     }
 
     public boolean hasArchive(String name) {
-        if (ArchiveNames == null) {
+        if (ArchiveNames == null || ArchiveNames.isEmpty()) {
+            Log.v(TAG, "ArchiveNames is empty");
             ArchiveNames = this.getArchiveNames();
         }
+
+        Log.v(TAG, "hasArchive: "+ArchiveNames);
 
         return ArchiveNames.contains(name.replaceAll("\\s", "-").toLowerCase().trim());
     }
@@ -118,7 +123,7 @@ public class Category {
         String[] projection = {
                 CategoryContract.CatEntry._ID,
                 CategoryContract.CatEntry.COLUMN_NAME_CATAGORY,
-                CategoryContract.CatEntry.COLUMN_NAME_NAME
+                CategoryContract.CatEntry.COLUMN_NAME_URL
         };
         String selection = CategoryContract.CatEntry.COLUMN_NAME_CATAGORY + " = ?";
         String[] selectionArgs = {this.name};
@@ -135,7 +140,10 @@ public class Category {
 
         ArrayList<String> ArchiveNames = new ArrayList<String>();
         while (cursor.moveToNext()) {
-            ArchiveNames.add(cursor.getString(cursor.getColumnIndex(CategoryContract.CatEntry.COLUMN_NAME_NAME))
+            //Log.v(TAG, "getArchiveNames: getting url "+cursor.getString(cursor.getColumnIndex(CategoryContract.CatEntry.COLUMN_NAME_URL)));
+            Matcher m = Pattern.compile("/?(\\w+?)/(.*?)/?", Pattern.CASE_INSENSITIVE).matcher(cursor.getString(cursor.getColumnIndex(CategoryContract.CatEntry.COLUMN_NAME_URL)));
+            m.matches();
+            ArchiveNames.add(m.group(2)
                     .replaceAll("\\s", "-")
                     .toLowerCase()
                     .trim()
@@ -223,6 +231,15 @@ public class Category {
         }
     }
 
+    public ArchiveRef getRef(Archive a) {
+        for (ArchiveRef ar : getArchives()) {
+            if (ar.getArchive() == a) {
+                return ar;
+            }
+        }
+        return null;
+    }
+
     Archive registerArchive(String name) {
         if (Archives.containsKey(name))
             return Archives.get(name);
@@ -247,6 +264,13 @@ public class Category {
             this.url = url;
             this.name = name;
             this.len = len;
+        }
+
+        public Archive getArchive() {
+            Log.d(TAG, "getArchive: '"+url+"'");
+            Matcher m = Pattern.compile("/?(\\w+?)/([\\w-]*?)/?", Pattern.CASE_INSENSITIVE).matcher(url);
+            m.matches();
+            return Archive.getArchive(m.group(1), m.group(2));
         }
 
         @Override

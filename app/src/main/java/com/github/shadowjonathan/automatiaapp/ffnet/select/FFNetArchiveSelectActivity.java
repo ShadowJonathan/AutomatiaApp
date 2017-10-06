@@ -1,6 +1,7 @@
 package com.github.shadowjonathan.automatiaapp.ffnet.select;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
@@ -175,5 +176,8 @@ public class FFNetArchiveSelectActivity extends AppCompatActivity implements Arc
     @Override
     public void onATap(Category.ArchiveRef item) {
         Toast.makeText(this, "Selected " + item.name, Toast.LENGTH_SHORT).show();
+        Intent ffnetI = new Intent(this, FFNetStorySelectActivity.class);
+        ffnetI.putExtra("archive", item.getArchive().makeID());
+        startActivity(ffnetI);
     }
 }

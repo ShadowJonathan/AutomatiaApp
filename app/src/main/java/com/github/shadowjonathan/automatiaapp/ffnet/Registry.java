@@ -98,7 +98,7 @@ public class Registry {
             }
 
             Cursor cursor = Db.query(
-                    CategoryContract.CatEntry.TABLE_NAME,
+                    RegistryContract.RegEntry.TABLE_NAME,
                     projection,
                     selection,
                     selectionArgs,

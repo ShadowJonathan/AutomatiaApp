@@ -8,4 +8,7 @@
     <dimen name="list_item_spacing">16dp</dimen>
     <dimen name="list_item_spacing_half">8dp</dimen>
     <dimen name="text_margin">16dp</dimen>
+
+    <dimen name="story_card_details_text">14sp</dimen>
+    <dimen name="story_card_details_image_height_and_width">17sp</dimen>
 </resources>

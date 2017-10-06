@@ -21,15 +21,16 @@ import android.widget.Toast;
 
 import com.github.shadowjonathan.automatiaapp.MainActivity;
 import com.github.shadowjonathan.automatiaapp.R;
-import com.github.shadowjonathan.automatiaapp.ffnet.Category;
+import com.github.shadowjonathan.automatiaapp.ffnet.Archive;
+import com.github.shadowjonathan.automatiaapp.ffnet.Registry;
 
 // second class because then it's just so easier to make a search bar than replace all fragments
-public class FFNetStorySelectActivity extends AppCompatActivity implements ArchiveFragment.OnArchiveTapListener {
+public class FFNetStorySelectActivity extends AppCompatActivity implements StoryFragment.OnStoryTapListener {
 
     private MenuItem mSearchAction;
     private boolean isSearchOpened = false;
     private EditText searchEdit;
-    private ArchiveFragment aFrag;
+    private StoryFragment sFrag;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,15 +41,15 @@ public class FFNetStorySelectActivity extends AppCompatActivity implements Archi
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        Category cat = Category.getCategory(getIntent().getStringExtra("cat"));
-        aFrag = ArchiveFragment.newInstance(cat);
+        Archive a = Archive.getArchive(getIntent().getStringExtra("archive"));
+        sFrag = StoryFragment.newInstance(a);
 
         getSupportFragmentManager()
                 .beginTransaction()
-                .add(R.id.root_layout, aFrag, "Archives")
+                .add(R.id.root_layout, sFrag, "Story")
                 .commit();
 
-        getSupportActionBar().setTitle(cat.getViewableName());
+        getSupportActionBar().setTitle(a.getViewableName());
     }
 
     @Override
@@ -169,8 +170,8 @@ public class FFNetStorySelectActivity extends AppCompatActivity implements Archi
     }
 
     private void doSearch(String s) {
-        Log.d("A_SEARCH", "Looking for '" + s + "'...");
-        aFrag.filter(s);
+        Log.d("S_SEARCH", "Looking for '" + s + "'...");
+        sFrag.filter(s);
     }
 
     private void doSearch() {
@@ -178,7 +179,7 @@ public class FFNetStorySelectActivity extends AppCompatActivity implements Archi
     }
 
     @Override
-    public void onATap(Category.ArchiveRef item) {
-        Toast.makeText(this, "Selected " + item.name, Toast.LENGTH_SHORT).show();
+    public void onSTap(Registry.RegistryEntry item) {
+        Toast.makeText(this, "Selected " + item.title, Toast.LENGTH_SHORT).show();
     }
 }

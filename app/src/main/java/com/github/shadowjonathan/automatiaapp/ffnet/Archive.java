@@ -1,9 +1,10 @@
 package com.github.shadowjonathan.automatiaapp.ffnet;
 
-
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.support.annotation.Nullable;
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.github.shadowjonathan.automatiaapp.background.Modules;
@@ -14,12 +15,13 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
 
 import static com.github.shadowjonathan.automatiaapp.ffnet.Category.Categories;
 
 public class Archive {
-    private static Map<String, Archive> Archives;
+    private static Map<String, Archive> Archives = new HashMap<String, Archive>();
     private static String TAG = "ARCHIVE";
     public String name;
     public Registry reg;
@@ -38,7 +40,9 @@ public class Archive {
             ffnet.sendMessage(getBase().i("info", true));
     }
 
+    @Nullable
     public static Archive getArchive(String cat, String name) {
+        Log.d(TAG, "getArchive: '" + cat + "' -> '" + name + "'");
         if (!Categories.containsKey(cat)) {
             Log.w("ARCHIVE_GET", cat + " DOES NOT EXIST");
             return null;
@@ -46,8 +50,10 @@ public class Archive {
 
         name = name.replaceAll("\\s", "-").toLowerCase();
         Category Cat = Categories.get(cat);
-        if (!Cat.hasArchive(name))
+        if (!Cat.hasArchive(name)) {
+            Log.w(TAG, "getArchive: CAT "+cat+ " DOES NOT HAVE "+name);
             return null;
+        }
         Archive a = Cat.registerArchive(name);
         Archives.put(a.makeID(), a);
         return a;
@@ -68,6 +74,10 @@ public class Archive {
         ffnet.sendMessage(getBase()
                 .i("getreg", true)
         );
+    }
+
+    public String getViewableName() {
+        return Cat.getRef(this).name;
     }
 
     public void onMessage(JSONObject o) throws JSONException {
@@ -136,10 +146,10 @@ public class Archive {
                         ArchiveContract.ArchEntry.COLUMN_NAME_EARLIEST,
                         ArchiveContract.ArchEntry.COLUMN_NAME_LATEST
                 },
-                ArchiveContract.ArchEntry.COLUMN_NAME_URL + " LIKE '?'",
-                new String[]{"%" + this.Cat.name + "/" + this.name + "%"},
+                ArchiveContract.ArchEntry.COLUMN_NAME_URL + " LIKE ?",
+                new String[]{("%" + this.Cat.name + "/" + this.name + "%")},
                 null, null, null, null);
-        if (cursor == null)
+        if (cursor == null || cursor.getCount() == 0)
             return null;
         ArchiveInfo ai = new ArchiveInfo(cursor);
         cursor.close();
@@ -161,14 +171,16 @@ public class Archive {
         public Date latest;
 
         ArchiveInfo(Cursor cursor) {
-            archive = cursor.getString(cursor.getColumnIndex(ArchiveContract.ArchEntry.COLUMN_NAME_ARCHIVE));
-            name = cursor.getString(cursor.getColumnIndex(ArchiveContract.ArchEntry.COLUMN_NAME_NAME));
-            url = cursor.getString(cursor.getColumnIndex(ArchiveContract.ArchEntry.COLUMN_NAME_URL));
-            len = cursor.getInt(cursor.getColumnIndex(ArchiveContract.ArchEntry.COLUMN_NAME_LEN));
-            amount = cursor.getInt(cursor.getColumnIndex(ArchiveContract.ArchEntry.COLUMN_NAME_AMOUNT));
-            earliest = Helper.parseDate(cursor.getString(cursor.getColumnIndex(ArchiveContract.ArchEntry.COLUMN_NAME_EARLIEST)));
-            latest = Helper.parseDate(cursor.getString(cursor.getColumnIndex(ArchiveContract.ArchEntry.COLUMN_NAME_LATEST)));
-
+            cursor.moveToFirst();
+            Log.d(TAG, "ArchiveInfo: "+cursor.getCount() + " ["+ TextUtils.join(", ", cursor.getColumnNames()) + "]");
+            cursor.moveToFirst();
+            archive = cursor.getString(0);
+            name = cursor.getString(1);
+            url = cursor.getString(2);
+            len = cursor.getInt(3);
+            amount = cursor.getInt(4);
+            earliest = Helper.parseDate(cursor.getString(5));
+            latest = Helper.parseDate(cursor.getString(6));
         }
     }
 }

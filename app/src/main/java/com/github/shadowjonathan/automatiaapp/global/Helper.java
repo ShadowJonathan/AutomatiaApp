@@ -21,6 +21,7 @@ import java.util.TreeMap;
 
 public final class Helper {
     private static final NavigableMap<Long, String> suffixes = new TreeMap<>();
+    private static final String TAG = "Helper";
 
     static {
         suffixes.put(1_000L, "k");
@@ -54,6 +55,8 @@ public final class Helper {
         } catch (ParseException ignored) {
 
         }
+
+        Log.w(TAG, "parseDate: date will not parse: "+s);
 
         return null;
     }
@@ -192,12 +195,24 @@ public final class Helper {
             }
         }
 
+        public static String shortLongSince(long duration) {
+            if (duration >= ONE_MINUTE) {
+                if (duration > ONE_HOUR) {
+                    return ((int) (duration / ONE_HOUR)) + "h ago";
+                } else {
+                    return ((int) (duration / ONE_MINUTE)) + "m ago";
+                }
+            } else {
+                return "Just now";
+            }
+        }
+
         /**
          * converts time (in milliseconds) to human-readable format
          * "<dd:>hh:mm:ss"
          */
         public static String millisToShortDHMS(long duration) {
-            String res = "";
+            String res;
             duration /= ONE_SECOND;
             int seconds = (int) (duration % SECONDS);
             duration /= SECONDS;
@@ -211,6 +226,23 @@ public final class Helper {
                 res = String.format("%dd%02d:%02d:%02d", days, hours, minutes, seconds);
             }
             return res;
+        }
+
+        public static String makeDate(Date date) {
+            // TODO
+            // SAME DAY: display time ago (6h ago)
+            // SAME YEAR: display date, no year (Oct 6)
+            // NOT SAME YEAR: display date and year (Oct 6, 2017)
+            long since = new Date().getTime() - date.getTime();
+            if (since < ONE_DAY) {
+                return shortLongSince(since);
+            } else {
+                if (new Date().getYear() == date.getYear()) {
+                    return new SimpleDateFormat("MMMM d", Locale.ENGLISH).format(date);
+                } else {
+                    return new SimpleDateFormat("MMMM d, yyyy", Locale.ENGLISH).format(date);
+                }
+            }
         }
     }
 

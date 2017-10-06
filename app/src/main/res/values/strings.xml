@@ -96,4 +96,5 @@
     <string name="pref_title_vibrate">Vibrate</string>
     <string name="title_activity_ffnet_main">Fanfiction.net</string>
     <string name="menu_search">Search</string>
+    <string name="story_card_text_status">Status:</string>
 </resources>

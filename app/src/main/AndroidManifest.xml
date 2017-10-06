@@ -42,6 +42,16 @@
                 android:value=".ffnet.select.FFNetCategorySelectActivity" />
         </activity>
 
+        <activity
+            android:name=".ffnet.select.FFNetStorySelectActivity"
+            android:label="@string/title_activity_ffnet_main"
+            android:parentActivityName=".MainActivity"
+            android:theme="@style/AppTheme">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".MainActivity" />
+        </activity>
+
         <receiver android:name=".background.autostart">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
