@@ -26,4 +26,10 @@ public abstract class MessageQueue {
             send(queue.pop());
         }
     }
+
+    public void check() {
+        if (condition())
+            if (!queue.isEmpty())
+                flush();
+    }
 }

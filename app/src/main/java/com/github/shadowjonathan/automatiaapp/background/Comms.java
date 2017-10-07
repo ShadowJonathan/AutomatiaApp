@@ -64,12 +64,13 @@ public class Comms {
         @Override
         public void run() {
             updateNotification();
-            if (online && (ws == null || ws.getReadyState() == WebSocket.READYSTATE.CLOSED)) {
+            if (online && (ws == null || ws.getReadyState() != WebSocket.READYSTATE.OPEN)) {
                 Log.i(WSTAG, "Found dead network link, trying to restart it...");
                 newWS();
             } else if (ws != null && ws.getReadyState() != WebSocket.READYSTATE.OPEN) {
                 Log.v(WSTAG, "Found a non-open network connection: " + ws.getReadyState());
             }
+            messages.check();
         }
     };
 
@@ -83,7 +84,7 @@ public class Comms {
         messages = new MessageQueue() {
             @Override
             public boolean condition() {
-                return ws != null;
+                return ws != null && ws.getReadyState() == WebSocket.READYSTATE.OPEN;
             }
 
             @Override
@@ -191,7 +192,7 @@ public class Comms {
     }
 
     private boolean isOnline() {
-        return this.online && ws != null;
+        return this.online && ws != null && ws.getReadyState() == WebSocket.READYSTATE.OPEN;
     }
 
     private WebSocketClient newWS() {
@@ -219,6 +220,7 @@ public class Comms {
             public void onClose(int code, String reason, boolean remote) {
                 Log.d(WSTAG, "CLOSE(" + (remote ? "server" : "local") + "): " + code + " > " + reason);
                 ws = null;
+                latestOffline = new Date();
                 if (code != -1) ;
                 // TODO
                 // UIHandler.obtainMessage(MainActivity.CMD_TOAST, "Automatia Disconnected").sendToTarget();
@@ -231,11 +233,11 @@ public class Comms {
 
             @Override
             public void send(String text) {
-                super.send(text);
                 if (text.contains("\"pong\""))
                     Log.v(WSTAG, "OUT: " + text);
                 else
                     Log.d(WSTAG, "OUT: " + text);
+                super.send(text);
             }
         };
         ws.connect();

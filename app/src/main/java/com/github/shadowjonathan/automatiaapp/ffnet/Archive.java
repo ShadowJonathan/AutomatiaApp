@@ -11,11 +11,14 @@ import com.github.shadowjonathan.automatiaapp.background.Modules;
 import com.github.shadowjonathan.automatiaapp.global.Helper;
 import com.github.shadowjonathan.automatiaapp.global.Updated;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 import static com.github.shadowjonathan.automatiaapp.ffnet.Category.Categories;
@@ -71,10 +74,18 @@ public class Archive {
     }
 
     public void getRegistry() {
+        Log.d(TAG, "getRegistry: LOADING REGISTRY FOR "+name);
         ffnet.sendMessage(getBase()
                 .i("getreg", true)
         );
     }
+
+    public void getRegistry(RegistryUpdateCallback r) {
+        regListener = r;
+        getRegistry();
+    }
+
+    private RegistryUpdateCallback regListener = null;
 
     public String getViewableName() {
         return Cat.getRef(this).name;
@@ -83,12 +94,19 @@ public class Archive {
     public void onMessage(JSONObject o) throws JSONException {
         if (o.has("registry")) {
             try {
-                try {
-                    if (!o.getBoolean("registry"))
-                        getRegistry();
-                } catch (JSONException ignored) {
+                if (!o.optBoolean("registry", true))
+                    getRegistry();
+                else {
+                    JSONObject rawreg = o.getJSONObject("registry");
+                    ArrayList<JSONObject> reglist = new ArrayList<JSONObject>();
+                    for (Iterator<String> it = rawreg.keys(); it.hasNext(); ) {
+                        reglist.add(rawreg.getJSONObject(it.next()));
+                    }
+                    reg.process(reglist);
+
+                    if (regListener != null)
+                        regListener.run();
                 }
-                reg.process(o.getJSONArray("registry"));
             } catch (JSONException je) {
                 Log.e(TAG, "onMessage: MESSAGE_JSONERROR", je);
             }
@@ -99,6 +117,10 @@ public class Archive {
                 ffnet.sendMessage(getBase()
                         .i("getinfo", true)
                 );
+        } else if (o.has("registry_update")) {
+            if (regListener != null) {
+                regListener.onUpdate(o.optString("registry_update", ""));
+            }
         }
     }
 
@@ -157,6 +179,10 @@ public class Archive {
         return ai;
     }
 
+    public boolean isRef(Category.ArchiveRef af) {
+        return af.url.toLowerCase().contains(this.name.toLowerCase());
+    }
+
     public String makeID() {
         return Cat.name.toLowerCase() + ">" + this.name.toLowerCase();
     }
@@ -182,6 +208,10 @@ public class Archive {
             earliest = Helper.parseDate(cursor.getString(5));
             latest = Helper.parseDate(cursor.getString(6));
         }
+    }
+
+    public static abstract class RegistryUpdateCallback implements Runnable {
+        public abstract void onUpdate(String text);
     }
 }
 

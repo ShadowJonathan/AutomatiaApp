@@ -238,9 +238,9 @@ public final class Helper {
                 return shortLongSince(since);
             } else {
                 if (new Date().getYear() == date.getYear()) {
-                    return new SimpleDateFormat("MMMM d", Locale.ENGLISH).format(date);
+                    return new SimpleDateFormat("MMM d", Locale.ENGLISH).format(date);
                 } else {
-                    return new SimpleDateFormat("MMMM d, yyyy", Locale.ENGLISH).format(date);
+                    return new SimpleDateFormat("MMM d, yyyy", Locale.ENGLISH).format(date);
                 }
             }
         }

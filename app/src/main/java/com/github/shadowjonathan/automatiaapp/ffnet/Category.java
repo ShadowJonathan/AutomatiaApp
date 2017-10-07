@@ -233,7 +233,7 @@ public class Category {
 
     public ArchiveRef getRef(Archive a) {
         for (ArchiveRef ar : getArchives()) {
-            if (ar.getArchive() == a) {
+            if (a.isRef(ar)) {
                 return ar;
             }
         }
@@ -268,7 +268,7 @@ public class Category {
 
         public Archive getArchive() {
             Log.d(TAG, "getArchive: '"+url+"'");
-            Matcher m = Pattern.compile("/?(\\w+?)/([\\w-]*?)/?", Pattern.CASE_INSENSITIVE).matcher(url);
+            Matcher m = Pattern.compile("/?(\\w+?)/(\\S*?)/?", Pattern.CASE_INSENSITIVE).matcher(url);
             m.matches();
             return Archive.getArchive(m.group(1), m.group(2));
         }

@@ -17,6 +17,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
@@ -46,11 +47,11 @@ public class Registry {
         return new RegistryList(db, forArchive);
     }
 
-    public void process(JSONArray a) {
+    public void process(List<JSONObject> a) {
         SQLiteDatabase DB = db.getWritableDatabase();
-        for (int i = 0; i < a.length(); i++) {
+        for (JSONObject o : a) {
             try {
-                processOne(a.getJSONObject(i), DB);
+                processOne(o, DB);
             } catch (JSONException je) {
                 Log.w(TAG, "process: JSONERROR", je);
             }
@@ -241,6 +242,10 @@ public class Registry {
                 l.add(a.get(i).toString());
             }
             return l;
+        }
+
+        public String fullURL() {
+            return "http://www.fanfiction.net/s/"+storyID+"/";
         }
     }
 }

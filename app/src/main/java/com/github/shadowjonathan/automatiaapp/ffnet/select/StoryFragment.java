@@ -1,19 +1,25 @@
 package com.github.shadowjonathan.automatiaapp.ffnet.select;
 
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.Context;
+import android.graphics.ColorFilter;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.github.shadowjonathan.automatiaapp.R;
 import com.github.shadowjonathan.automatiaapp.ffnet.Archive;
@@ -25,12 +31,9 @@ import java.util.List;
 
 public class StoryFragment extends Fragment {
 
-    private static final String ARG_ARCHIVE = "archive";
     private static String TAG = "ST_FRAG";
-    public Archive archive;
-    private OnStoryTapListener mListener;
-    private ArchiveRecyclerAdapter ARA;
 
+    /*
     public StoryFragment() {
     }
 
@@ -61,7 +64,7 @@ public class StoryFragment extends Fragment {
             RecyclerView recyclerView = (RecyclerView) view;
             recyclerView.setLayoutManager(new LinearLayoutManager(context));
             Log.d(TAG, "onCreateView reg: "+archive.reg.getList());
-            ARA = new ArchiveRecyclerAdapter(archive.reg.getList(), mListener, getContext());
+            ARA = new StoryRecyclerAdapter(archive.reg.getList(), mListener, getContext());
             recyclerView.setAdapter(ARA);
         }
 
@@ -89,20 +92,20 @@ public class StoryFragment extends Fragment {
 
     public void filter(String s) {
         ARA.filter(s);
-    }
+    }*/
 
-    public interface OnStoryTapListener {
+    interface OnStoryTapListener {
         void onSTap(Registry.RegistryEntry item);
     }
 
-    public static class ArchiveRecyclerAdapter extends RecyclerView.Adapter<ArchiveRecyclerAdapter.ViewHolder> {
+    static class StoryRecyclerAdapter extends RecyclerView.Adapter<StoryRecyclerAdapter.ViewHolder> {
 
         private final List<Registry.RegistryEntry> allValues;
         private final OnStoryTapListener mListener;
         private List<Registry.RegistryEntry> mValues;
         private Context context;
 
-        public ArchiveRecyclerAdapter(List<Registry.RegistryEntry> items, OnStoryTapListener listener, Context context) {
+        StoryRecyclerAdapter(List<Registry.RegistryEntry> items, OnStoryTapListener listener, Context context) {
             mValues = items;
             allValues = new ArrayList<Registry.RegistryEntry>(items);
             mListener = listener;
@@ -112,20 +115,19 @@ public class StoryFragment extends Fragment {
         @Override
         public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
             View view = LayoutInflater.from(parent.getContext())
-                    .inflate(R.layout.ffnet_fragment_archive, parent, false);
+                    .inflate(R.layout.ffnet_fragment_story, parent, false);
             return new ViewHolder(view);
         }
 
         @Override
         public void onBindViewHolder(final ViewHolder holder, int position) {
             holder.mItem = mValues.get(position);
-            Registry.RegistryEntry re = mValues.get(position);
-            // TODO MAKE REGISTRY
-            //holder.mContentView.setText(ar.name);
-            //holder.mAmountView.setText(Helper.formatNumber(ar.len));
+            final Registry.RegistryEntry re = mValues.get(position);
+            Log.d(TAG, "onBindViewHolder: " + mValues + " " + mValues.size() + " " + position + " " + System.identityHashCode(holder));
+            Log.d(TAG, "onBindViewHolder: " + holder.title + " " + holder.mView.getId() + "*" + R.id.story_card);
 
             holder.title.setText(re.title);
-            holder.author.setText("By "+re.author);
+            holder.author.setText("By " + re.author);
             holder.summary.setText(re.summary);
             holder.favorites.setText(Helper.formatNumber(re.favs));
             holder.follows.setText(Helper.formatNumber(re.follows));
@@ -134,25 +136,39 @@ public class StoryFragment extends Fragment {
             holder.chapters.setText(Helper.formatNumber(re.chapters));
             if (re.completed) {
                 holder.done_or_progress.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_done));
-                holder.done_or_progress.setColorFilter(R.color.story_done);
+                holder.done_or_progress.setColorFilter(ContextCompat.getColor(context, R.color.story_done));
             } else {
                 holder.done_or_progress.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_pencil));
-                holder.done_or_progress.setColorFilter(R.color.story_card_grey);
+                holder.done_or_progress.setColorFilter(ContextCompat.getColor(context, R.color.story_card_grey));
             }
             if (re.updated != null) {
                 holder.updated.setText(Helper.TSUtils.makeDate(re.updated));
             } else {
                 holder.updated_wrapper.setVisibility(View.GONE);
             }
-            holder.published.setText(Helper.TSUtils.makeDate(re.updated));
+            holder.published.setText(Helper.TSUtils.makeDate(re.published));
             holder.genre.setText(TextUtils.join(", ", re.genre));
+
+            holder.actions.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
+                @Override
+                public boolean onMenuItemClick(MenuItem item) {
+                    Log.d(TAG, "onMenuItemClick: pressed " + item.toString());
+                    switch (item.getItemId()) {
+                        case R.id.action_copy_url:
+                            ClipboardManager clipboard = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
+                            ClipData clip = ClipData.newPlainText("Url for " + re.title, re.fullURL());
+                            clipboard.setPrimaryClip(clip);
+                            Toast.makeText(context, "Copied URL", Toast.LENGTH_SHORT).show();
+                            break;
+                    }
+                    return false;
+                }
+            });
 
             holder.mView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     if (null != mListener) {
-                        // Notify the active callbacks interface (the activity, if the
-                        // fragment is attached to one) that an item has been selected.
                         mListener.onSTap(holder.mItem);
                     }
                 }
@@ -162,6 +178,10 @@ public class StoryFragment extends Fragment {
         @Override
         public int getItemCount() {
             return mValues.size();
+        }
+
+        List<Registry.RegistryEntry> getItems() {
+            return allValues;
         }
 
         public void filter(String s) {
@@ -195,6 +215,7 @@ public class StoryFragment extends Fragment {
             public final TextView chapters;
             public final TextView updated;
             public final LinearLayout updated_wrapper;
+            public final Toolbar actions;
 
             public Registry.RegistryEntry mItem;
 
@@ -214,11 +235,16 @@ public class StoryFragment extends Fragment {
                 chapters = (TextView) view.findViewById(R.id.chap_len);
                 updated = (TextView) view.findViewById(R.id.up_when);
                 updated_wrapper = (LinearLayout) view.findViewById(R.id.up_wrap);
+                actions = (Toolbar) view.findViewById(R.id.card_toolbar);
+
+                actions.inflateMenu(R.menu.story_card);
+
+                Log.d(TAG, "ViewHolder called " + System.identityHashCode(this));
             }
 
             @Override
             public String toString() {
-                return super.toString() + " '" + title.getText() +  "'";
+                return super.toString() + " '" + (title == null ? "" : title.getText()) + "'";
             }
         }
     }
