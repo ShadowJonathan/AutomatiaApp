@@ -44,4 +44,5 @@ dependencies {
     compile 'com.github.pwittchen:infinitescroll:0.0.1'
     compile 'org.apmem.tools:layouts:1.10@aar'
     testCompile 'junit:junit:4.12'
+    compile 'com.google.code.gson:gson:2.8.2'
 }

@@ -60,11 +60,12 @@ public class Comms {
     private Context app_context;
     private boolean online;
     private Timer connect_timer = new Timer();
+    private MessageQueue messages;
     private TimerTask tt = new TimerTask() {
         @Override
         public void run() {
             updateNotification();
-            if (online && (ws == null || ws.getReadyState() != WebSocket.READYSTATE.OPEN)) {
+            if (online && (ws == null || ws.getReadyState() == WebSocket.READYSTATE.CLOSED)) {
                 Log.i(WSTAG, "Found dead network link, trying to restart it...");
                 newWS();
             } else if (ws != null && ws.getReadyState() != WebSocket.READYSTATE.OPEN) {
@@ -74,22 +75,20 @@ public class Comms {
         }
     };
 
-    private MessageQueue messages;
-
     public Comms(Modules m, Context context) {
         app_context = context;
         cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
         M = m;
         M.BindComms(this);
-        messages = new MessageQueue() {
+        messages = new MessageQueue(context) {
             @Override
             public boolean condition() {
                 return ws != null && ws.getReadyState() == WebSocket.READYSTATE.OPEN;
             }
 
             @Override
-            public void send(Object o) {
-                ws.send(o.toString());
+            public void send(String o) {
+                ws.send(o);
             }
         };
 
@@ -133,7 +132,6 @@ public class Comms {
     }
 
     private Notification.Builder makeBaseNotification() {
-        // TODO DEP?
         return Helper.Notification.perm(app_context)
                 .setSubText("Communication")
                 ;
@@ -191,7 +189,7 @@ public class Comms {
         updateNotification();
     }
 
-    private boolean isOnline() {
+    public boolean isOnline() {
         return this.online && ws != null && ws.getReadyState() == WebSocket.READYSTATE.OPEN;
     }
 
@@ -221,9 +219,6 @@ public class Comms {
                 Log.d(WSTAG, "CLOSE(" + (remote ? "server" : "local") + "): " + code + " > " + reason);
                 ws = null;
                 latestOffline = new Date();
-                if (code != -1) ;
-                // TODO
-                // UIHandler.obtainMessage(MainActivity.CMD_TOAST, "Automatia Disconnected").sendToTarget();
             }
 
             @Override
@@ -284,8 +279,6 @@ public class Comms {
     private void onReady() {
         M.onReady();
         messages.flush();
-        // TODO
-        // UIHandler.obtainMessage(MainActivity.CMD_TOAST, "Automatia Connected").sendToTarget();
     }
 
     public void onDestroy() {

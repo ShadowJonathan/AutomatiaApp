@@ -76,6 +76,14 @@ public class Category {
         return new ArrayList<Category>(Categories.values());
     }
 
+    public static String findCat(String archive) {
+        for (Category cat : Categories.values()) {
+            if (cat.hasArchive(archive))
+                return cat.name;
+        }
+        return null;
+    }
+
     public String getViewableName() {
         return RealNames.get(this.name);
     }
@@ -83,9 +91,14 @@ public class Category {
     public void onMessage(JSONObject o) {
         try {
             if (!o.optString("archive").isEmpty()) {
-                Archive a = getArchive(o.optString("archive"));
-                if (a == null) Log.w(TAG, "onMessage: MISSED MESSAGE: " + o);
-                else a.onMessage(o);
+                if (hasArchive(o.optString("archive"))) {
+                    Archive a = registerArchive(o.optString("archive"));
+                    if (a != null) {
+                        a.onMessage(o);
+                        return;
+                    }
+                }
+                Log.w(TAG, "onMessage: MISSED MESSAGE: " + o);
             } else if (o.has("meta")) {
                 if (o.optString("meta").equals("category")) {
                     final JSONObject O = o;
@@ -112,7 +125,7 @@ public class Category {
             ArchiveNames = this.getArchiveNames();
         }
 
-        Log.v(TAG, "hasArchive: "+ArchiveNames);
+        Log.v(TAG, "hasArchive: " + ArchiveNames);
 
         return ArchiveNames.contains(name.replaceAll("\\s", "-").toLowerCase().trim());
     }
@@ -267,7 +280,7 @@ public class Category {
         }
 
         public Archive getArchive() {
-            Log.d(TAG, "getArchive: '"+url+"'");
+            Log.d(TAG, "getArchive: '" + url + "'");
             Matcher m = Pattern.compile("/?(\\w+?)/(\\S*?)/?", Pattern.CASE_INSENSITIVE).matcher(url);
             m.matches();
             return Archive.getArchive(m.group(1), m.group(2));

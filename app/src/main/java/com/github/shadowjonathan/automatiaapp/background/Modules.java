@@ -5,7 +5,9 @@ import android.util.Log;
 
 import com.github.shadowjonathan.automatiaapp.ffnet.Category;
 import com.github.shadowjonathan.automatiaapp.ffnet.FFnetDBHelper;
+import com.github.shadowjonathan.automatiaapp.ffnet.Stamps;
 import com.github.shadowjonathan.automatiaapp.global.GlobalDBhelper;
+import com.github.shadowjonathan.automatiaapp.global.Helper;
 import com.github.shadowjonathan.automatiaapp.global.Updated;
 
 import org.json.JSONException;
@@ -61,6 +63,10 @@ public class Modules {
 
     void onReady() {
 
+    }
+
+    public boolean isOnline() {
+        return C != null && C.isOnline();
     }
 
     void onDestroy() {
@@ -133,8 +139,24 @@ public class Modules {
             C.send(o);
         }
 
+        public boolean isOnline() {
+            return Modules.this.isOnline();
+        }
+
         void dumpStamps() {
-            Log.d("", "dumpStamps: " + app_context.getFilesDir().getParent());
+            String temp = "";
+            Stamps stamps = new Stamps();
+            for (Updated.UpdateTag tag : Updated.getAll()) {
+                stamps.input(tag.ID, tag.regarding, tag.date);
+                temp += "\n" + tag.regarding + " -> " + tag.ID + ": " + Helper.TSUtils.getISO8601(tag.date);
+            }
+            Log.d("UPDATES_DUMP", temp);
+            Log.d("UPDATES_DUMP", stamps.getJSON().toString());
+            sendMessage(
+                    new Helper.JSONConstructor()
+                            .i("stamps", true)
+                            .i("data", stamps.getJSON())
+            );
         }
 
         Category resolve(JSONObject o) {

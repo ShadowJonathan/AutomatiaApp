@@ -3,11 +3,8 @@ package com.github.shadowjonathan.automatiaapp.ffnet.select;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
-import android.graphics.ColorFilter;
-import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
-import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
@@ -22,7 +19,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.github.shadowjonathan.automatiaapp.R;
-import com.github.shadowjonathan.automatiaapp.ffnet.Archive;
 import com.github.shadowjonathan.automatiaapp.ffnet.Registry;
 import com.github.shadowjonathan.automatiaapp.global.Helper;
 
@@ -123,9 +119,10 @@ public class StoryFragment extends Fragment {
         public void onBindViewHolder(final ViewHolder holder, int position) {
             holder.mItem = mValues.get(position);
             final Registry.RegistryEntry re = mValues.get(position);
+            /*
             Log.d(TAG, "onBindViewHolder: " + mValues + " " + mValues.size() + " " + position + " " + System.identityHashCode(holder));
             Log.d(TAG, "onBindViewHolder: " + holder.title + " " + holder.mView.getId() + "*" + R.id.story_card);
-
+            */
             holder.title.setText(re.title);
             holder.author.setText("By " + re.author);
             holder.summary.setText(re.summary);
@@ -141,13 +138,17 @@ public class StoryFragment extends Fragment {
                 holder.done_or_progress.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_pencil));
                 holder.done_or_progress.setColorFilter(ContextCompat.getColor(context, R.color.story_card_grey));
             }
-            if (re.updated != null) {
+            if (re.updated != null)
                 holder.updated.setText(Helper.TSUtils.makeDate(re.updated));
-            } else {
+            else
                 holder.updated_wrapper.setVisibility(View.GONE);
-            }
+
             holder.published.setText(Helper.TSUtils.makeDate(re.published));
-            holder.genre.setText(TextUtils.join(", ", re.genre));
+
+            if (re.genre.isEmpty())
+                holder.genre_wrapper.setVisibility(View.GONE);
+            else
+                holder.genre.setText(TextUtils.join(", ", re.genre));
 
             holder.actions.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
                 @Override
@@ -184,18 +185,9 @@ public class StoryFragment extends Fragment {
             return allValues;
         }
 
-        public void filter(String s) {
-            s = s.toLowerCase();
-            /*
-            mValues.clear();
-            for (Category.ArchiveRef a : allValues) {
-                if (a.name.toLowerCase().contains(s)) {
-                    mValues.add(a);
-                }
-            }*/
-            notifyDataSetChanged();
+        public void sortBy(int type) {
 
-            Log.d(TAG, "filtering '" + s + String.format("'... (%d/%d)", mValues.size(), allValues.size()));
+            notifyDataSetChanged();
         }
 
         @SuppressWarnings("WeakerAccess")
@@ -211,6 +203,7 @@ public class StoryFragment extends Fragment {
             public final TextView words;
             public final ImageView done_or_progress;
             public final TextView genre;
+            public final LinearLayout genre_wrapper;
             public final TextView published;
             public final TextView chapters;
             public final TextView updated;
@@ -231,6 +224,7 @@ public class StoryFragment extends Fragment {
                 words = (TextView) view.findViewById(R.id.words_len);
                 done_or_progress = (ImageView) view.findViewById(R.id.done_or_progress);
                 genre = (TextView) view.findViewById(R.id.genre);
+                genre_wrapper = (LinearLayout) view.findViewById(R.id.genre_wrapper);
                 published = (TextView) view.findViewById(R.id.pub_when);
                 chapters = (TextView) view.findViewById(R.id.chap_len);
                 updated = (TextView) view.findViewById(R.id.up_when);

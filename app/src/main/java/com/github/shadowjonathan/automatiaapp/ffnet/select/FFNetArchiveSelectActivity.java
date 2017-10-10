@@ -17,7 +17,6 @@ import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.github.shadowjonathan.automatiaapp.R;
 import com.github.shadowjonathan.automatiaapp.ffnet.Category;
@@ -175,7 +174,7 @@ public class FFNetArchiveSelectActivity extends AppCompatActivity implements Arc
 
     @Override
     public void onATap(Category.ArchiveRef item) {
-        Toast.makeText(this, "Selected " + item.name, Toast.LENGTH_SHORT).show();
+        //Toast.makeText(this, "Selected " + item.name, Toast.LENGTH_SHORT).show();
         Intent ffnetI = new Intent(this, FFNetStorySelectActivity.class);
         ffnetI.putExtra("archive", item.getArchive().makeID());
         startActivity(ffnetI);

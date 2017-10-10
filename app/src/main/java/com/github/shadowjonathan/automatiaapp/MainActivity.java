@@ -108,14 +108,13 @@ public class MainActivity extends AppCompatActivity
         navigationView.setNavigationItemSelectedListener(this);
         navigationView.getMenu().getItem(0).setChecked(true);
 
-        doBindService();
-
         Log.d(TAG, "+++ ON CREATE +++");
     }
 
     @Override
     public void onStart() {
         super.onStart();
+        doBindService();
         Log.d(TAG, "++ ON START ++");
     }
 
@@ -134,13 +133,13 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void onStop() {
         super.onStop();
+        doUnbindService();
         Log.d(TAG, "-- ON STOP --");
     }
 
     @Override
     public void onDestroy() {
         Log.d(TAG, "--- ON DESTROY ---");
-        doUnbindService();
         super.onDestroy();
     }
 
@@ -190,6 +189,7 @@ public class MainActivity extends AppCompatActivity
             return true;
         } else if (id == R.id.action_debug) {
             //openDebug();
+            //dialog3();
             return true;
         } else if (id == R.id.action_ffnet) {
             openFFNET();

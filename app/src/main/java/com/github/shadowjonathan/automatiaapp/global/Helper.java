@@ -8,6 +8,12 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -56,7 +62,7 @@ public final class Helper {
 
         }
 
-        Log.w(TAG, "parseDate: date will not parse: "+s);
+        Log.w(TAG, "parseDate: date will not parse: " + s);
 
         return null;
     }
@@ -81,6 +87,46 @@ public final class Helper {
         long truncated = value / (divideBy / 10);
         boolean hasDecimal = truncated < 100 && (truncated / 10d) != (truncated / 10);
         return hasDecimal ? (truncated / 10d) + suffix : (truncated / 10) + suffix;
+    }
+
+    public static void writeMessageQueue(String data, Context context) {
+        try {
+            OutputStreamWriter outputStreamWriter = new OutputStreamWriter(context.openFileOutput("messageStack.json", Context.MODE_PRIVATE));
+            outputStreamWriter.write(data);
+            outputStreamWriter.close();
+        } catch (FileNotFoundException e) {
+            Log.e("Exception", "File write failed: ", e);
+        } catch (IOException e) {
+            Log.e("Exception", "File write failed: ", e);
+        }
+    }
+
+    public static String readMessageQueue(Context context) {
+        String ret = "";
+
+        try {
+            InputStream inputStream = context.openFileInput("messageStack.json");
+
+            if (inputStream != null) {
+                InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
+                BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+                String receiveString;
+                StringBuilder stringBuilder = new StringBuilder();
+
+                while ((receiveString = bufferedReader.readLine()) != null) {
+                    stringBuilder.append(receiveString);
+                }
+
+                inputStream.close();
+                ret = stringBuilder.toString();
+            }
+        } catch (FileNotFoundException e) {
+            Log.e("login activity", "File not found: " + e.toString());
+        } catch (IOException e) {
+            Log.e("login activity", "Can not read file: " + e.toString());
+        }
+
+        return ret;
     }
 
     public static class JSONConstructor extends JSONObject {
@@ -134,6 +180,19 @@ public final class Helper {
             }
             return this;
         }
+
+        public JSONConstructor i(String name, Object value) {
+            try {
+                super.put(name, value);
+            } catch (JSONException je) {
+                Log.w(TAG, "i_bool: ERR", je);
+            }
+            return this;
+        }
+
+        public JSONConstructor i(String name, Date value) {
+            return i(name, Helper.TSUtils.getISO8601(value));
+        }
     }
 
     public static class TSUtils {
@@ -144,10 +203,13 @@ public final class Helper {
         public final static long ONE_HOUR = ONE_MINUTE * 60;
         public final static long HOURS = 24;
         public final static long ONE_DAY = ONE_HOUR * 24;
+
         private TSUtils() {
         }
 
         public static String getISO8601(Date date) {
+            if (date == null)
+                return null;
             DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.UK);
             dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
             return dateFormat.format(date);
@@ -229,10 +291,6 @@ public final class Helper {
         }
 
         public static String makeDate(Date date) {
-            // TODO
-            // SAME DAY: display time ago (6h ago)
-            // SAME YEAR: display date, no year (Oct 6)
-            // NOT SAME YEAR: display date and year (Oct 6, 2017)
             long since = new Date().getTime() - date.getTime();
             if (since < ONE_DAY) {
                 return shortLongSince(since);
