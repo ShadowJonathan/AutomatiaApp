@@ -5,20 +5,26 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.IBinder;
+import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.text.InputType;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -27,10 +33,18 @@ import com.github.shadowjonathan.automatiaapp.background.Comms;
 import com.github.shadowjonathan.automatiaapp.background.Modules;
 import com.github.shadowjonathan.automatiaapp.background.Operator;
 import com.github.shadowjonathan.automatiaapp.ffnet.select.FFNetCategorySelectActivity;
+import com.github.shadowjonathan.automatiaapp.global.DirListener;
+import com.github.shadowjonathan.automatiaapp.global.HomeScreenHelp;
+
+import net.rdrei.android.dirchooser.DirectoryChooserConfig;
+import net.rdrei.android.dirchooser.DirectoryChooserFragment;
 
 public class MainActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener {
+        implements NavigationView.OnNavigationItemSelectedListener,
+        ActivityCompat.OnRequestPermissionsResultCallback
+        , DirectoryChooserFragment.OnFragmentInteractionListener {
     private static final String TAG = "ActivityActions";
+    private static int selected = 0;
     private Operator OPS;
     private Comms C;
     private Modules M;
@@ -52,6 +66,8 @@ public class MainActivity extends AppCompatActivity
         }
     };
     private boolean mIsBound = false;
+    private DirectoryChooserFragment chooserDialog;
+    private DirListener dirListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -115,7 +131,9 @@ public class MainActivity extends AppCompatActivity
     public void onStart() {
         super.onStart();
         doBindService();
+        select();
         Log.d(TAG, "++ ON START ++");
+        select();
     }
 
     @Override
@@ -141,6 +159,37 @@ public class MainActivity extends AppCompatActivity
     public void onDestroy() {
         Log.d(TAG, "--- ON DESTROY ---");
         super.onDestroy();
+    }
+
+    public void addToTitle(String s) {
+        getSupportActionBar().setTitle(getResources().getString(R.string.app_name) + " - " + s);
+    }
+
+    public void addToTitle() {
+        getSupportActionBar().setTitle(R.string.app_name);
+    }
+
+    private void select(int i) {
+        selected = i;
+        select();
+    }
+
+    private void select() {
+        RecyclerView rview = (RecyclerView) findViewById(R.id.home_screen);
+        Log.d(TAG, "select: " + selected);
+        switch (selected) {
+            case 0:
+                rview.setAdapter(new HomeScreen());
+                addToTitle();
+                break;
+            case 1:
+                com.github.shadowjonathan.automatiaapp.ffnet.HomeScreen hv = new com.github.shadowjonathan.automatiaapp.ffnet.HomeScreen();
+                rview.setAdapter(hv);
+                dirListener = hv.dl;
+                addToTitle("Fanfiction");
+                break;
+        }
+        ((NavigationView) findViewById(R.id.nav_view)).getMenu().getItem(selected).setChecked(true);
     }
 
     void doBindService() {
@@ -188,16 +237,29 @@ public class MainActivity extends AppCompatActivity
         if (id == R.id.action_settings) {
             return true;
         } else if (id == R.id.action_debug) {
-            //openDebug();
-            //dialog3();
-            return true;
+            chooserDialog = DirectoryChooserFragment.newInstance(DirectoryChooserConfig.builder()
+                    .newDirectoryName("Stories")
+                    .allowReadOnlyDirectory(false)
+                    .allowNewDirectoryNameModification(true)
+                    .initialDirectory(Environment.getExternalStorageDirectory().getAbsolutePath())
+                    .build());
+
+            Log.d(TAG, "onOptionsItemSelected: " + Environment.getExternalStorageDirectory());
+
+            chooserDialog.show(getFragmentManager(), null);
+
         } else if (id == R.id.action_ffnet) {
             openFFNET();
             return true;
         }
-
-
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        if (requestCode == 1337) if (grantResults[0] == PackageManager.PERMISSION_GRANTED)
+            Toast.makeText(this, "Granted permission, re-tap the button to proceed to saving the file", Toast.LENGTH_SHORT).show();
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
 
     @SuppressWarnings("StatementWithEmptyBody")
@@ -206,8 +268,10 @@ public class MainActivity extends AppCompatActivity
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
-        if (id == R.id.nav_ffnet) {
-            Toast.makeText(this, "Selected FFnet!", Toast.LENGTH_SHORT).show();
+        if (id == R.id.nav_home) {
+            select(0);
+        } else if (id == R.id.nav_ffnet) {
+            select(1);
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -218,5 +282,45 @@ public class MainActivity extends AppCompatActivity
     public void openFFNET() {
         Intent ffnetI = new Intent(MainActivity.this, FFNetCategorySelectActivity.class);
         startActivity(ffnetI);
+    }
+
+    @Override
+    public void onSelectDirectory(@NonNull String path) {
+        Log.d(TAG, "onSelectDirectory: " + path);
+        if (dirListener != null)
+            dirListener.select(path);
+        if (chooserDialog != null)
+            chooserDialog.dismiss();
+    }
+
+    @Override
+    public void onCancelChooser() {
+        if (dirListener != null)
+            dirListener.dismiss();
+        if (chooserDialog != null)
+            chooserDialog.dismiss();
+    }
+
+    public static class HomeScreen extends RecyclerView.Adapter<RecyclerView.ViewHolder> implements HomeScreenHelp.HasPalette {
+
+        @Override
+        public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+            return null;
+        }
+
+        @Override
+        public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
+
+        }
+
+        @Override
+        public int getItemCount() {
+            return 0;
+        }
+
+        @Override
+        public HomeScreenHelp.Palette getPalette() {
+            return null;
+        }
     }
 }

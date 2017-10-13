@@ -56,76 +56,6 @@ public class FFNetStorySelectActivity extends AppCompatActivity implements Story
     private int by_current = 0;
     private int status_current = 0; // 0: any, 1: in-progress, 2: complete
 
-    /*
-        @Override
-        protected void onCreate(Bundle savedInstanceState) {
-            super.onCreate(savedInstanceState);
-
-            setContentView(R.layout.ffnet_select_archive);
-            Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-            setSupportActionBar(toolbar);
-            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-
-            Archive a = Archive.getArchive(getIntent().getStringExtra("archive"));
-            sFrag = StoryFragment.newInstance(a);
-
-            getSupportFragmentManager()
-                    .beginTransaction()
-                    .add(R.id.root_layout, sFrag, "Story")
-                    .commit();
-
-            getSupportActionBar().setTitle(a.getViewableName());
-        }
-    */
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.ffa, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onPrepareOptionsMenu(Menu menu) {
-        filter = menu.findItem(R.id.action_filter);
-        refresh = menu.findItem(R.id.action_refresh);
-        pin = menu.findItem(R.id.action_pin);
-        return super.onPrepareOptionsMenu(menu);
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case android.R.id.home:
-                onBackPressed();
-                return true;
-
-            // MENU
-            case R.id.action_filter:
-                openSort();
-                return true;
-            case R.id.action_refresh:
-                if (archive.refresh())
-                    Toast.makeText(this, "Queried refresh", Toast.LENGTH_SHORT).show();
-                else
-                    Toast.makeText(this, "Refresh already queried", Toast.LENGTH_SHORT).show();
-                return true;
-        }
-
-        return super.onOptionsItemSelected(item);
-    }
-
-    @Override
-    public void onBackPressed() {
-        Log.d(TAG, "onBackPressed");
-        Intent i = new Intent(this, MainActivity.class);
-        i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        startActivity(i);
-        super.onBackPressed();
-    }
-
-    @Override
-    public void onSTap(Registry.RegistryEntry item) {
-        Toast.makeText(this, "Selected " + item.title, Toast.LENGTH_SHORT).show();
-    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -191,6 +121,62 @@ public class FFNetStorySelectActivity extends AppCompatActivity implements Story
         }).start();
 
         getSupportActionBar().setTitle(archive.getViewableName());
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.ffa, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        filter = menu.findItem(R.id.action_filter);
+        refresh = menu.findItem(R.id.action_refresh);
+        pin = menu.findItem(R.id.action_pin);
+        return super.onPrepareOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                onBackPressed();
+                return true;
+
+            // MENU
+            case R.id.action_filter:
+                openSort();
+                return true;
+            case R.id.action_refresh:
+                if (archive.refresh())
+                    Toast.makeText(this, "Queried refresh", Toast.LENGTH_SHORT).show();
+                else
+                    Toast.makeText(this, "Refresh already queried", Toast.LENGTH_SHORT).show();
+                return true;
+            case R.id.action_pin:
+                if (archive.togglePin())
+                    Toast.makeText(this, "Pinned archive", Toast.LENGTH_SHORT).show();
+                else
+                    Toast.makeText(this, "Unpinned archive", Toast.LENGTH_SHORT).show();
+                return true;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onBackPressed() {
+        Log.d(TAG, "onBackPressed");
+        Intent i = new Intent(this, MainActivity.class);
+        i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(i);
+        super.onBackPressed();
+    }
+
+    @Override
+    public void onSTap(Registry.RegistryEntry item) {
+        Toast.makeText(this, "Selected " + item.title, Toast.LENGTH_SHORT).show();
     }
 
     @Override

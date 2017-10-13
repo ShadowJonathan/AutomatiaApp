@@ -15,12 +15,15 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.github.shadowjonathan.automatiaapp.R;
 import com.github.shadowjonathan.automatiaapp.ffnet.Registry;
+import com.github.shadowjonathan.automatiaapp.ffnet.Story;
 import com.github.shadowjonathan.automatiaapp.global.Helper;
+import com.github.shadowjonathan.automatiaapp.global.HomeScreenHelp;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -94,7 +97,7 @@ public class StoryFragment extends Fragment {
         void onSTap(Registry.RegistryEntry item);
     }
 
-    static class StoryRecyclerAdapter extends RecyclerView.Adapter<StoryRecyclerAdapter.ViewHolder> {
+    public static class StoryRecyclerAdapter extends RecyclerView.Adapter<StoryRecyclerAdapter.ViewHolder> {
 
         private final List<Registry.RegistryEntry> allValues;
         private final OnStoryTapListener mListener;
@@ -106,6 +109,25 @@ public class StoryFragment extends Fragment {
             allValues = new ArrayList<Registry.RegistryEntry>(items);
             mListener = listener;
             this.context = context;
+        }
+
+        public static String makeCharactersAndShips(ArrayList<String> characters, ArrayList<String> ships) {
+            if (ships.isEmpty())
+                return TextUtils.join(", ", characters);
+            else {
+                ArrayList<String> unShippedCharacters = new ArrayList<>(characters);
+                String shipString = "";
+                for (String ship : ships) {
+                    for (String s : ship.split("/"))
+                        unShippedCharacters.remove(s);
+                    shipString += "[" + ship + "]";
+                }
+
+                if (!unShippedCharacters.isEmpty())
+                    return TextUtils.join(", ", unShippedCharacters) + ", " + shipString;
+                else
+                    return shipString;
+            }
         }
 
         @Override
@@ -150,6 +172,11 @@ public class StoryFragment extends Fragment {
             else
                 holder.genre.setText(TextUtils.join(", ", re.genre));
 
+            if (re.characters.isEmpty())
+                holder.characters_row.setVisibility(View.GONE);
+            else
+                holder.characters.setText(makeCharactersAndShips(re.characters, re.ships));
+
             holder.actions.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
                 @Override
                 public boolean onMenuItemClick(MenuItem item) {
@@ -160,6 +187,11 @@ public class StoryFragment extends Fragment {
                             ClipData clip = ClipData.newPlainText("Url for " + re.title, re.fullURL());
                             clipboard.setPrimaryClip(clip);
                             Toast.makeText(context, "Copied URL", Toast.LENGTH_SHORT).show();
+                            break;
+                        case R.id.action_download:
+                            Story s = Story.getStory(re.storyID, re);
+                            s.putDownload();
+                            Log.d(TAG, "onMenuItemClick: CALLED DOWNLOAD");
                             break;
                     }
                     return false;
@@ -186,12 +218,11 @@ public class StoryFragment extends Fragment {
         }
 
         public void sortBy(int type) {
-
             notifyDataSetChanged();
         }
 
         @SuppressWarnings("WeakerAccess")
-        public class ViewHolder extends RecyclerView.ViewHolder {
+        public static class ViewHolder extends HomeScreenHelp.CategorisedViewHolder {
             public final View mView;
 
             public final TextView title;
@@ -209,8 +240,12 @@ public class StoryFragment extends Fragment {
             public final TextView updated;
             public final LinearLayout updated_wrapper;
             public final Toolbar actions;
+            public final TableRow characters_row;
+            public final TextView characters;
 
             public Registry.RegistryEntry mItem;
+
+            public Context context;
 
             public ViewHolder(View view) {
                 super(view);
@@ -230,15 +265,27 @@ public class StoryFragment extends Fragment {
                 updated = (TextView) view.findViewById(R.id.up_when);
                 updated_wrapper = (LinearLayout) view.findViewById(R.id.up_wrap);
                 actions = (Toolbar) view.findViewById(R.id.card_toolbar);
+                characters_row = (TableRow) view.findViewById(R.id.person_row);
+                characters = (TextView) view.findViewById(R.id.person_text);
 
                 actions.inflateMenu(R.menu.story_card);
 
                 Log.d(TAG, "ViewHolder called " + System.identityHashCode(this));
             }
 
+            public ViewHolder attachContext(Context context) {
+                this.context = context;
+                return this;
+            }
+
             @Override
             public String toString() {
                 return super.toString() + " '" + (title == null ? "" : title.getText()) + "'";
+            }
+
+            @Override
+            public int getType(HomeScreenHelp.Palette fromPalette) {
+                return fromPalette.getType(ViewHolder.class);
             }
         }
     }

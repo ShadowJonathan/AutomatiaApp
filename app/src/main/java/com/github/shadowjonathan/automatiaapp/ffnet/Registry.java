@@ -5,6 +5,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 
+import com.github.shadowjonathan.automatiaapp.background.Modules;
 import com.github.shadowjonathan.automatiaapp.global.Helper;
 import com.github.shadowjonathan.automatiaapp.global.Updated;
 
@@ -19,10 +20,11 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 public class Registry {
     private static String TAG = "REGISTRY";
+    private static RegistryList cache;
+    private static Map<String, RegistryEntry> map_cache;
     private Archive forArchive;
     private FFnetDBHelper db;
     private Updated u;
@@ -33,14 +35,48 @@ public class Registry {
         u = new Updated("registry", a.name);
     }
 
-    public static RegistryEntry requestStorySearch(String ID, FFnetDBHelper db) {
+    private static RegistryList getCache() {
+        if (cache == null)
+            cache = new RegistryList(Modules.ffnet.getDB(), null);
+        return cache;
+    }
+
+    public static Map<String, RegistryEntry> getMapCache() {
+        if (map_cache == null)
+            map_cache = getCache().toMap();
+        return map_cache;
+    }
+
+    public static RegistryEntry requestStorySearch(String ID) {
         Log.d(TAG, "requestStorySearch: LOOKING FOR STORY WITH '" + ID + "'");
-        for (RegistryEntry re : new RegistryList(db, null)) {
-            if (Objects.equals(re.storyID, ID))
-                return re;
+        RegistryEntry temp = getMapCache().get(ID);
+        if (temp == null)
+            Log.d(TAG, "requestStorySearch: CANT FIND '" + ID + "'");
+        return temp;
+    }
+
+    private static void register(RegistryEntry re, FFnetDBHelper db) throws JSONException {
+        SQLiteDatabase DB = db.getWritableDatabase();
+        JSONObject o = re.original;
+        String storyID = o.getString("storyID");
+        ContentValues values = new ContentValues();
+        values.put(RegistryContract.RegEntry.COLUMN_NAME_ARCHIVE, re.archive);
+        values.put(RegistryContract.RegEntry.COLUMN_NAME_STORYID, storyID);
+        values.put(RegistryContract.RegEntry.COLUMN_NAME_DATA, o.toString());
+
+        int id = (int) DB.insertWithOnConflict(
+                RegistryContract.RegEntry.TABLE_NAME,
+                null,
+                values,
+                SQLiteDatabase.CONFLICT_IGNORE
+        );
+        if (id == -1) {
+            DB.update(
+                    RegistryContract.RegEntry.TABLE_NAME,
+                    values,
+                    RegistryContract.RegEntry.COLUMN_NAME_STORYID + "=?",
+                    new String[]{storyID});
         }
-        Log.d(TAG, "requestStorySearch: CANT FIND '" + ID + "'");
-        return null;
     }
 
     public RegistryList getList() {
@@ -130,7 +166,6 @@ public class Registry {
 
     public static class RegistryEntry {
         public String archive;
-
         public String rating;
         public Date updated;
         public int words;
@@ -153,6 +188,7 @@ public class Registry {
         public Date last_refresh;
         public String storyID;
         public Date published;
+        protected JSONObject original;
 
         RegistryEntry(Cursor cursor) throws JSONException {
             String data = cursor.getString(cursor.getColumnIndex(RegistryContract.RegEntry.COLUMN_NAME_DATA));
@@ -160,6 +196,15 @@ public class Registry {
 
             archive = cursor.getString(cursor.getColumnIndex(RegistryContract.RegEntry.COLUMN_NAME_ARCHIVE));
 
+            processJSON(o);
+        }
+
+        RegistryEntry(JSONObject o) throws JSONException {
+            archive = o.optString("archive", "");
+            processJSON(o);
+        }
+
+        void processJSON(JSONObject o) throws JSONException {
             if (o.has("rating"))
                 rating = o.getString("rating");
 
@@ -234,6 +279,8 @@ public class Registry {
 
             if (o.has("published"))
                 published = Helper.parseDate(o.getString("published"));
+
+            original = o;
         }
 
         private ArrayList<String> toList(JSONArray a) throws JSONException {
@@ -245,7 +292,15 @@ public class Registry {
         }
 
         public String fullURL() {
-            return "http://www.fanfiction.net/s/"+storyID+"/";
+            return "http://www.fanfiction.net/s/" + storyID + "/";
+        }
+
+        public void register(FFnetDBHelper db) {
+            try {
+                Registry.register(this, db);
+            } catch (JSONException je) {
+                Log.e(TAG, "register: JSON ERROR", je);
+            }
         }
     }
 }

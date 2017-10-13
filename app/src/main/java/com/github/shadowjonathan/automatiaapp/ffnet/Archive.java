@@ -27,9 +27,10 @@ public class Archive {
     private static String TAG = "ARCHIVE";
     public String name;
     public Registry reg;
-    private Category Cat;
+    protected Category Cat;
     private Modules.FFnet ffnet;
     private Updated u;
+    private Pinned p;
     private boolean refreshing = false;
     private RegistryUpdateCallback regListener = null;
 
@@ -39,6 +40,7 @@ public class Archive {
         this.ffnet = ffnet;
         reg = new Registry(this, ffnet.getDB());
         u = new Updated("archive", this.name);
+        p = new Pinned(this);
 
         if (getInfo() == null)
             ffnet.sendMessage(getBase().i("info", true));
@@ -65,6 +67,12 @@ public class Archive {
 
     public static Archive getArchive(String ID) {
         return Archives.get(ID);
+    }
+
+    public boolean togglePin() {
+        boolean state = p.isPinned();
+        p.setPinned(!state);
+        return !state;
     }
 
     private Helper.JSONConstructor getBase() {
@@ -119,6 +127,8 @@ public class Archive {
                             for (Iterator<String> it = rawreg.keys(); it.hasNext(); ) {
                                 reglist.add(rawreg.getJSONObject(it.next()));
                             }
+                            if (regListener != null)
+                                regListener.onUpdate("Processing...");
                             reg.process(reglist);
 
                             if (regListener != null)
@@ -202,12 +212,100 @@ public class Archive {
         return af.url.toLowerCase().contains(this.name.toLowerCase());
     }
 
+    public Category.ArchiveRef getRef() {
+        return Cat.getRef(this);
+    }
+
     public String makeID() {
         return Cat.name.toLowerCase() + ">" + this.name.toLowerCase();
     }
 
     public static abstract class RegistryUpdateCallback implements Runnable {
         public abstract void onUpdate(String text);
+    }
+
+    public static class Pinned {
+        private static FFnetDBHelper DB;
+        private Archive regarding;
+
+        public Pinned(Archive regarding) {
+            this.regarding = regarding;
+        }
+
+        public static void bindDB(FFnetDBHelper db) {
+            DB = db;
+        }
+
+        public static ArrayList<Archive> getAll() {
+            ArrayList<Archive> list = new ArrayList<Archive>();
+            Cursor cursor = DB.getReadableDatabase().query(
+                    PinContract.PinEntry.TABLE_NAME,
+                    new String[]{
+                            PinContract.PinEntry.COLUMN_NAME_CATEGORY,
+                            PinContract.PinEntry.COLUMN_NAME_ARCHIVE,
+                            PinContract.PinEntry.COLUMN_NAME_PINNED
+                    },
+                    null, null, null, null, null, null);
+
+            while (cursor.moveToNext()) {
+                if (cursor.getInt(cursor.getColumnIndex(PinContract.PinEntry.COLUMN_NAME_PINNED)) == 1) {
+                    String cat = cursor.getString(cursor.getColumnIndex(PinContract.PinEntry.COLUMN_NAME_CATEGORY));
+                    String archive = cursor.getString(cursor.getColumnIndex(PinContract.PinEntry.COLUMN_NAME_ARCHIVE));
+                    list.add(
+                            Categories.get(cat)
+                                    .registerArchive(archive)
+                    );
+                }
+            }
+            cursor.close();
+
+
+            return list;
+        }
+
+        public boolean isPinned() {
+            Cursor cursor = DB.getReadableDatabase().query(
+                    PinContract.PinEntry.TABLE_NAME,
+                    new String[]{
+                            PinContract.PinEntry.COLUMN_NAME_CATEGORY,
+                            PinContract.PinEntry.COLUMN_NAME_ARCHIVE,
+                            PinContract.PinEntry.COLUMN_NAME_PINNED
+                    },
+                    PinContract.PinEntry.COLUMN_NAME_CATEGORY + "=? AND " + PinContract.PinEntry.COLUMN_NAME_ARCHIVE + "=?",
+                    new String[]{regarding.Cat.name, regarding.name},
+                    null, null, null, null);
+            if (cursor != null && cursor.getCount() == 1)
+                cursor.moveToFirst();
+            else
+                return false;
+            boolean yes = cursor.getInt(cursor.getColumnIndex(PinContract.PinEntry.COLUMN_NAME_PINNED)) == 1;
+            cursor.close();
+            return yes;
+        }
+
+        public void setPinned(boolean pinned) {
+            SQLiteDatabase db = DB.getWritableDatabase();
+
+            ContentValues values = new ContentValues();
+            values.put(PinContract.PinEntry.COLUMN_NAME_CATEGORY, regarding.Cat.name);
+            values.put(PinContract.PinEntry.COLUMN_NAME_ARCHIVE, regarding.name);
+            values.put(PinContract.PinEntry.COLUMN_NAME_PINNED, pinned ? 1 : 0);
+
+            int id = (int) db.insertWithOnConflict(
+                    PinContract.PinEntry.TABLE_NAME,
+                    null,
+                    values,
+                    SQLiteDatabase.CONFLICT_IGNORE
+            );
+            if (id == -1) {
+                db.update(
+                        PinContract.PinEntry.TABLE_NAME,
+                        values,
+                        PinContract.PinEntry.COLUMN_NAME_CATEGORY + "=? AND " + PinContract.PinEntry.COLUMN_NAME_ARCHIVE + "=?",
+                        new String[]{regarding.Cat.name, regarding.name}
+                );
+            }
+        }
     }
 
     public class ArchiveInfo {

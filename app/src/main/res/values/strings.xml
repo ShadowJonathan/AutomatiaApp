@@ -127,9 +127,10 @@
     <string name="menu_copy_url">Copy URL</string>
     <string name="progress_example_text">Downloading…</string>
     <string name="story_menu_refresh">Refresh</string>
-    <string name="story_menu_pin">Pin</string>
+    <string name="story_menu_pin">Toggle Pin</string>
     <string name="name_sort">Sort</string>
     <string name="name_by">By</string>
     <string name="name_done">Done</string>
     <string name="name_status">Status:</string>
+    <string name="name_query_download">Query download</string>
 </resources>

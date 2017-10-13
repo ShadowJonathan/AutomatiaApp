@@ -29,8 +29,8 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 public class Comms {
-    private static final URI AUTOMATIA_WS;
-    private static final URI AUTOMATIA_URL;
+    public static final URI AUTOMATIA_WS;
+    public static final URI AUTOMATIA_URL;
     private static final String WSTAG = "NETWORK/WS";
     private static final int online_n_id = 9001;
 
@@ -45,7 +45,7 @@ public class Comms {
 
         tmp = null;
         try {
-            tmp = new URI("http://automatia.tk");
+            tmp = new URI("http://automatia.tk/");
         } catch (URISyntaxException e) {
             // Handle exception.
         }

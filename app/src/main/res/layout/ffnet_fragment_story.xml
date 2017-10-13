@@ -289,7 +289,7 @@
                                 android:id="@+id/genre"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="Hurt/Comfort, Suspense"
+                                android:text="Hurt/Comfort"
                                 android:textColor="@color/story_card_grey_darker"
                                 android:textSize="@dimen/story_card_details_text" />
 
@@ -297,6 +297,38 @@
 
                     </LinearLayout>
 
+                </TableRow>
+
+                <TableRow
+                    android:id="@+id/person_row"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingBottom="5dp"
+                    android:paddingLeft="5dp"
+                    android:paddingStart="5dp">
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="5dp">
+
+                        <ImageView
+                            android:layout_width="@dimen/story_card_details_image_height_and_width"
+                            android:layout_height="@dimen/story_card_details_image_height_and_width"
+                            android:layout_marginLeft="5dp"
+                            android:layout_marginRight="5dp"
+                            android:tint="@color/story_card_grey"
+                            app:srcCompat="@drawable/ic_person" />
+
+                        <TextView
+                            android:id="@+id/person_text"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Danny, Sam, Tucker"
+                            android:textColor="@color/story_card_grey_darker"
+                            android:textSize="@dimen/story_card_details_text" />
+
+                    </LinearLayout>
                 </TableRow>
 
             </TableLayout>

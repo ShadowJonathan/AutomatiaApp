@@ -5,7 +5,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
 public class FFnetDBHelper extends SQLiteOpenHelper {
-    public static final int DATABASE_VERSION = 1;
+    public static final int DATABASE_VERSION = 2;
     public static final String DATABASE_NAME = "FFnet.db";
 
     public FFnetDBHelper(Context context) {
@@ -16,12 +16,16 @@ public class FFnetDBHelper extends SQLiteOpenHelper {
         db.execSQL(CategoryContract.SQL_CREATE_ENTRIES);
         db.execSQL(RegistryContract.SQL_CREATE_ENTRIES);
         db.execSQL(ArchiveContract.SQL_CREATE_ENTRIES);
+        db.execSQL(PinContract.SQL_CREATE_ENTRIES);
+        db.execSQL(StoryContract.SQL_CREATE_ENTRIES);
     }
 
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         db.execSQL(CategoryContract.SQL_DELETE_ENTRIES);
         db.execSQL(RegistryContract.SQL_DELETE_ENTRIES);
         db.execSQL(ArchiveContract.SQL_DELETE_ENTRIES);
+        db.execSQL(PinContract.SQL_DELETE_ENTRIES);
+        db.execSQL(StoryContract.SQL_DELETE_ENTRIES);
 
         onCreate(db);
     }

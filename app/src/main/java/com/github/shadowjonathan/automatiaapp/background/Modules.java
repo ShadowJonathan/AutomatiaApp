@@ -1,11 +1,18 @@
 package com.github.shadowjonathan.automatiaapp.background;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
+import com.github.shadowjonathan.automatiaapp.ffnet.Archive;
 import com.github.shadowjonathan.automatiaapp.ffnet.Category;
 import com.github.shadowjonathan.automatiaapp.ffnet.FFnetDBHelper;
 import com.github.shadowjonathan.automatiaapp.ffnet.Stamps;
+import com.github.shadowjonathan.automatiaapp.ffnet.Story;
+import com.github.shadowjonathan.automatiaapp.global.Downloads;
 import com.github.shadowjonathan.automatiaapp.global.GlobalDBhelper;
 import com.github.shadowjonathan.automatiaapp.global.Helper;
 import com.github.shadowjonathan.automatiaapp.global.Updated;
@@ -16,19 +23,17 @@ import org.json.JSONObject;
 import static com.github.shadowjonathan.automatiaapp.ffnet.Category.Categories;
 
 public class Modules {
+    public static FFnet ffnet;
     private static String TAG = "MODULES";
     protected GlobalDBhelper GDB;
-    private FFnet ffnet;
     private Comms C;
     private Context app_context;
-    private String FileDir;
-    private String CacheDir;
 
     public Modules(Context context) {
+        Download.bindContext(context);
         app_context = context;
-        FileDir = app_context.getFilesDir().getParent();
-        CacheDir = FileDir + "/cache";
         Updated.bindDB(getGDB());
+        Downloads.bindDB(getGDB());
 
         ffnet = new FFnet();
     }
@@ -89,27 +94,26 @@ public class Modules {
     public class FFnet {
         protected FFnetDBHelper DB;
         private String TAG = "MODULES.FFNET";
-        /*
-        private File stories;
-        private File archives;
-        private File cacheRoot;
-        */
+        private LocalBroadcastManager localBroadcastManager;
+        private BroadcastReceiver storyDownloaded = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                long id = intent.getLongExtra(Download.DOWNLOAD_COMPLETE_EXTRA_ID, -1);
+                Downloads d = new Downloads();
+                if (d.hasID(id) && d.ownerOf(id).equals("ffnet")) {
+                    Story s = Story.getStory(d.extraInfo(id));
+                    Log.d(TAG, "onReceive: EXTRA:" + d.extraInfo(id));
+
+                    s.markDownloaded(s.info.updated, intent.getStringExtra(Download.DOWNLOAD_COMPLETE_EXTRA_FILE), context);
+                } else
+                    Log.w(TAG, "onReceive: " + id + " DID NOT PASS");
+            }
+        };
 
         FFnet() {
-            /*
-            stories = new File(CacheDir + "/ffnet/stories");
-            archives = new File(CacheDir + "/ffnet/archives");
-            cacheRoot = new File(CacheDir + "/ffnet/");
-            if (!cacheRoot.exists())
-                cacheRoot.mkdirs();
-            if (!stories.exists())
-                stories.mkdirs();
-            if (!archives.exists())
-                archives.mkdirs();
-
-            Archive.init(archives);
-            Category.init(cacheRoot);
-            */
+            Archive.Pinned.bindDB(getDB());
+            localBroadcastManager = LocalBroadcastManager.getInstance(getContext());
+            localBroadcastManager.registerReceiver(storyDownloaded, new IntentFilter(Download.DOWNLOAD_COMPLETE));
         }
 
         public Context getContext() {
@@ -127,6 +131,8 @@ public class Modules {
                 this.dumpStamps();
             } else if (o.has("category")) {
                 resolve(o).onMessage(o);
+            } else if (o.has("s_id")) {
+                Story.getStory(o.optString("s_id")).onMessage(o);
             }
         }
 

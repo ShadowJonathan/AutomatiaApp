@@ -14,6 +14,7 @@ import android.widget.TextView;
 import com.github.shadowjonathan.automatiaapp.R;
 import com.github.shadowjonathan.automatiaapp.ffnet.Category;
 import com.github.shadowjonathan.automatiaapp.global.Helper;
+import com.github.shadowjonathan.automatiaapp.global.HomeScreenHelp;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,7 +25,7 @@ public class ArchiveFragment extends Fragment {
     private static String TAG = "AR_frag";
     public Category parentCategory;
     private OnArchiveTapListener mListener;
-    private CategoryRecyclerAdapter CRA;
+    private ArchiveRecyclerAdapter CRA;
 
     public ArchiveFragment() {
     }
@@ -55,7 +56,7 @@ public class ArchiveFragment extends Fragment {
             Context context = view.getContext();
             RecyclerView recyclerView = (RecyclerView) view;
             recyclerView.setLayoutManager(new LinearLayoutManager(context));
-            CRA = new CategoryRecyclerAdapter(parentCategory.getArchives(), mListener);
+            CRA = new ArchiveRecyclerAdapter(parentCategory.getArchives(), mListener);
             recyclerView.setAdapter(CRA);
         }
 
@@ -89,13 +90,13 @@ public class ArchiveFragment extends Fragment {
         void onATap(Category.ArchiveRef item);
     }
 
-    public static class CategoryRecyclerAdapter extends RecyclerView.Adapter<CategoryRecyclerAdapter.ViewHolder> {
+    public static class ArchiveRecyclerAdapter extends RecyclerView.Adapter<ArchiveRecyclerAdapter.ViewHolder> {
 
         private final List<Category.ArchiveRef> allValues;
         private final OnArchiveTapListener mListener;
         private List<Category.ArchiveRef> mValues;
 
-        public CategoryRecyclerAdapter(List<Category.ArchiveRef> items, OnArchiveTapListener listener) {
+        public ArchiveRecyclerAdapter(List<Category.ArchiveRef> items, OnArchiveTapListener listener) {
             mValues = items;
             allValues = new ArrayList<Category.ArchiveRef>(items);
             mListener = listener;
@@ -143,7 +144,7 @@ public class ArchiveFragment extends Fragment {
             Log.d(TAG, "filtering '" + s + String.format("'... (%d/%d)", mValues.size(), allValues.size()));
         }
 
-        public class ViewHolder extends RecyclerView.ViewHolder {
+        public static class ViewHolder extends HomeScreenHelp.CategorisedViewHolder {
             public final View mView;
             public final TextView mContentView;
             public final TextView mAmountView;
@@ -159,6 +160,21 @@ public class ArchiveFragment extends Fragment {
             @Override
             public String toString() {
                 return super.toString() + " '" + mContentView.getText() + "'";
+            }
+
+            @Override
+            public int getType(HomeScreenHelp.Palette fromPalette) {
+                return fromPalette.getType(ViewHolder.class);
+            }
+
+            public static class Ref {
+                public int amount;
+                public String text;
+
+                public Ref(int amount, String text) {
+                    this.amount = amount;
+                    this.text = text;
+                }
             }
         }
     }

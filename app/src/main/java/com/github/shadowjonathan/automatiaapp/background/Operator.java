@@ -7,6 +7,8 @@ import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
+import com.github.shadowjonathan.automatiaapp.ffnet.Registry;
+
 
 public class Operator extends Service {
     private static String TAG = "OPS";
@@ -30,11 +32,13 @@ public class Operator extends Service {
         M = new Modules(this);
         C = new Comms(M, this);
         M.onComms(C);
+
+        Registry.getMapCache();
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        //return super.onStartCommand(intent, flags, startId);
+        Log.d(TAG, "onStartCommand: Initiated start");
         return START_STICKY;
     }
 

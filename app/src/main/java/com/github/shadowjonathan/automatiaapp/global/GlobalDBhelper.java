@@ -5,7 +5,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
 public class GlobalDBhelper extends SQLiteOpenHelper {
-    public static final int DATABASE_VERSION = 1;
+    public static final int DATABASE_VERSION = 3;
     public static final String DATABASE_NAME = "global.db";
 
     public GlobalDBhelper(Context context) {
@@ -14,10 +14,12 @@ public class GlobalDBhelper extends SQLiteOpenHelper {
 
     public void onCreate(SQLiteDatabase db) {
         db.execSQL(UpdateContract.SQL_CREATE_ENTRIES);
+        db.execSQL(DownloadContract.SQL_CREATE_ENTRIES);
     }
 
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         db.execSQL(UpdateContract.SQL_DELETE_ENTRIES);
+        db.execSQL(DownloadContract.SQL_DELETE_ENTRIES);
 
         onCreate(db);
     }
