@@ -8,7 +8,7 @@ public class StoryContract {
                     SEntry._ID + " INTEGER PRIMARY KEY," +
                     SEntry.COLUMN_NAME_ID + " TEXT UNIQUE," +
                     SEntry.COLUMN_NAME_DOWNLOADED + " BOOLEAN," +
-                    SEntry.COLUMN_NAME_LATEST_UPDATE + " TEXT)";
+                    SEntry.COLUMN_NAME_LATEST_UPDATE + " TEXT NOT NULL)";
     public static final String SQL_DELETE_ENTRIES =
             "DROP TABLE IF EXISTS " + CategoryContract.CatEntry.TABLE_NAME;
 

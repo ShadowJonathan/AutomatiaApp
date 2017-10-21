@@ -143,7 +143,7 @@ public class StoryFragment extends Fragment {
             final Registry.RegistryEntry re = mValues.get(position);
             /*
             Log.d(TAG, "onBindViewHolder: " + mValues + " " + mValues.size() + " " + position + " " + System.identityHashCode(holder));
-            Log.d(TAG, "onBindViewHolder: " + holder.title + " " + holder.mView.getId() + "*" + R.id.story_card);
+            Log.d(TAG, "onBindViewHolder: " + holder.title + " " + holder.mView.getId() + "*" + R.id.ffnet_story_card);
             */
             holder.title.setText(re.title);
             holder.author.setText("By " + re.author);
@@ -190,7 +190,11 @@ public class StoryFragment extends Fragment {
                             break;
                         case R.id.action_download:
                             Story s = Story.getStory(re.storyID, re);
-                            s.putDownload();
+                            if (s.putDownload()) {
+                                Toast.makeText(context, "Downloading...", Toast.LENGTH_SHORT).show();
+                            } else {
+                                Toast.makeText(context, "Download already queried", Toast.LENGTH_SHORT).show();
+                            }
                             Log.d(TAG, "onMenuItemClick: CALLED DOWNLOAD");
                             break;
                     }
@@ -268,7 +272,7 @@ public class StoryFragment extends Fragment {
                 characters_row = (TableRow) view.findViewById(R.id.person_row);
                 characters = (TextView) view.findViewById(R.id.person_text);
 
-                actions.inflateMenu(R.menu.story_card);
+                actions.inflateMenu(R.menu.ffnet_story_card);
 
                 Log.d(TAG, "ViewHolder called " + System.identityHashCode(this));
             }

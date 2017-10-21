@@ -36,11 +36,13 @@ public class Story {
     private static String TAG = "STORY";
     public String ID;
     public Registry.RegistryEntry info;
+    public Integer state;
+    public int p_state = 0;
+    public int p_total = 0;
+    protected ProgressState progress;
     private Archive from;
     private boolean downloadQueried = false;
     private Boolean downloaded;
-    private Integer state;
-    private ProgressState progress;
 
     public Story(String ID, Registry.RegistryEntry re) {
         this.ID = ID;
@@ -65,9 +67,8 @@ public class Story {
     }
 
     public static ArrayList<Story> getList() {
-        SQLiteDatabase Db = ffnet.getDB().getReadableDatabase();
-
         ArrayList<Story> list = new ArrayList<Story>();
+        SQLiteDatabase Db = ffnet.getDB().getReadableDatabase();
 
         String[] projection = {
                 StoryContract.SEntry._ID,
@@ -89,6 +90,13 @@ public class Story {
             );
 
         cursor.close();
+
+        for (Story s : Stories.values()) {
+            if (s.getState() > 0)
+                if (!list.contains(s))
+                    list.add(s);
+        }
+        Log.d(TAG, "getList: LEN " + list.size());
         return list;
     }
 
@@ -158,7 +166,9 @@ public class Story {
     }
 
     private boolean updateReady() {
-        return Minutes.minutesBetween(new DateTime(info.updated), new DateTime(downloadedDate())).isGreaterThan(Minutes.minutes(5));
+        Date downloadedDate = downloadedDate();
+        Minutes mins = Minutes.minutesBetween(new DateTime(info.updated), new DateTime(downloadedDate));
+        return (mins.getMinutes() >= 0 ? mins : mins.negated()).isGreaterThan(Minutes.minutes(5));
     }
 
     private Date downloadedDate() {
@@ -174,10 +184,13 @@ public class Story {
                 null, null, null, null);
         if (cursor != null && cursor.getCount() == 1)
             cursor.moveToFirst();
-        else
+        else {
+            Log.w(TAG, "downloadedDate: DATE IS NULL");
             return null;
+        }
         Date last = Helper.parseDate(cursor.getString(cursor.getColumnIndex(StoryContract.SEntry.COLUMN_NAME_LATEST_UPDATE)));
         cursor.close();
+        Log.d(TAG, "downloadedDate: DD is " + last);
         return last;
     }
 
@@ -284,6 +297,8 @@ public class Story {
 
             changeState(DOWNLOADING);
 
+            db.close();
+
             Log.d(TAG, "putDownload");
             return true;
         } else
@@ -298,8 +313,16 @@ public class Story {
     }
 
     private void showProgress(int total, int progress) {
-        if (this.progress != null)
-            this.progress.showProgress(total, progress);
+        if (progress > p_state) {
+            p_state = progress;
+            p_total = 0;
+            if (this.progress != null)
+                this.progress.showProgress(total, progress);
+        }
+        if (progress == 0) {
+            p_state = 0;
+            p_total = total;
+        }
     }
 
     protected void registerProgress(ProgressState p) {
@@ -324,6 +347,11 @@ public class Story {
         } else {
             Log.d(TAG, "onMessage: MISSED: " + o);
         }
+    }
+
+    @Override
+    public String toString() {
+        return super.toString() + " " + (info != null ? info.title : "INFONULL");
     }
 
     public static abstract class ProgressState {

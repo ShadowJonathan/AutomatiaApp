@@ -7,4 +7,6 @@
     <color name="story_done">#a4c439</color>
     <color name="story_card_grey">#aaa</color>
     <color name="story_card_grey_darker">#777</color>
+
+    <color name="white">#fff</color>
 </resources>

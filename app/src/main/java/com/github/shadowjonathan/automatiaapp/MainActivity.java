@@ -131,7 +131,6 @@ public class MainActivity extends AppCompatActivity
     public void onStart() {
         super.onStart();
         doBindService();
-        select();
         Log.d(TAG, "++ ON START ++");
         select();
     }

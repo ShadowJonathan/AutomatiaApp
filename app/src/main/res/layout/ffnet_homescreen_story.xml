@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/story_card"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -36,9 +37,17 @@
                 android:textAppearance="@style/TextAppearance.AppCompat.Title" />
 
             <TextView
+                android:id="@+id/story_author"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="10dp"
+                android:text="by AkoyaMizuno" />
+
+            <TextView
                 android:id="@+id/story_archive"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginBottom="10dp"
                 android:layout_marginLeft="10dp"
                 android:text="in Danny Phantom" />
 
@@ -70,14 +79,13 @@
                 android:id="@+id/downloaded_wrapper"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_margin="20dp"
                 android:orientation="horizontal">
 
-                <Button
+                <!--<Button
                     android:id="@+id/action_export"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Export Story" />
+                    android:text="Export Story" />-->
 
                 <View
                     android:layout_width="0dp"
@@ -88,6 +96,7 @@
                     android:id="@+id/action_update"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_margin="20dp"
                     android:text="Update Story" />
             </LinearLayout>
 
@@ -96,7 +105,9 @@
         <android.support.v7.widget.Toolbar
             android:id="@+id/card_toolbar"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            app:menu="@menu/ffnet_home_story_card" />
+
     </android.support.v7.widget.CardView>
 
 </LinearLayout>

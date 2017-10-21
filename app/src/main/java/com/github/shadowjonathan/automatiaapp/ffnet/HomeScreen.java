@@ -1,11 +1,14 @@
 package com.github.shadowjonathan.automatiaapp.ffnet;
 
+import android.Manifest;
 import android.app.Activity;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Environment;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
@@ -271,6 +274,24 @@ public class HomeScreen extends RecyclerView.Adapter<HomeScreenHelp.CategorisedV
         return groups.amount();
     }
 
+    public boolean checkStoragePerms(Activity context) {
+        if (ContextCompat.checkSelfPermission(context,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                != PackageManager.PERMISSION_GRANTED) {
+
+            // Should we show an explanation?
+            if (ActivityCompat.shouldShowRequestPermissionRationale(context,
+                    Manifest.permission.READ_CONTACTS)) {
+
+            } else {
+                ActivityCompat.requestPermissions(context,
+                        new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 0);
+            }
+            return false;
+        } else
+            return true;
+    }
+
     class SimpleReferrer extends HomeScreenHelp.CategorisedViewHolder {
         protected View view;
         private Class reference;
@@ -314,14 +335,16 @@ public class HomeScreen extends RecyclerView.Adapter<HomeScreenHelp.CategorisedV
 
         private TextView story_title;
         private TextView story_archive;
+        private TextView story_author;
 
         private LinearLayout progress_wrapper;
         private TextView progress_text;
         private ProgressBar progress;
 
         private LinearLayout downloaded_wrapper;
-        private Button action_export;
         private Button action_update;
+
+        private Toolbar actions;
 
         private int state;
 
@@ -330,20 +353,26 @@ public class HomeScreen extends RecyclerView.Adapter<HomeScreenHelp.CategorisedV
             view = itemView;
             story_title = (TextView) view.findViewById(R.id.story_title);
             story_archive = (TextView) view.findViewById(R.id.story_archive);
+            story_author = (TextView) view.findViewById(R.id.story_author);
 
             progress_wrapper = (LinearLayout) view.findViewById(R.id.progress_wrapper);
             progress_text = (TextView) view.findViewById(R.id.progress_text);
             progress = (ProgressBar) view.findViewById(R.id.progress);
 
             downloaded_wrapper = (LinearLayout) view.findViewById(R.id.downloaded_wrapper);
-            action_export = (Button) view.findViewById(R.id.action_export);
             action_update = (Button) view.findViewById(R.id.action_update);
+
+            actions = (Toolbar) view.findViewById(R.id.card_toolbar);
+
+            actions.inflateMenu(R.menu.ffnet_home_story_card);
         }
 
         public void bind(final Story s) {
+            final Activity a = (Activity) view.getContext();
             story = s;
             story_title.setText(s.info.title);
             story_archive.setText("in " + s.from().getViewableName());
+            story_author.setText("by " + s.info.author);
 
             progress_wrapper.setVisibility(View.GONE);
             downloaded_wrapper.setVisibility(View.GONE);
@@ -409,32 +438,52 @@ public class HomeScreen extends RecyclerView.Adapter<HomeScreenHelp.CategorisedV
                 }
             });
 
-            action_export.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    chooserDialog = DirectoryChooserFragment.newInstance(DirectoryChooserConfig.builder()
-                            .newDirectoryName("Stories")
-                            .allowReadOnlyDirectory(false)
-                            .allowNewDirectoryNameModification(true)
-                            .initialDirectory(Environment.getExternalStorageDirectory().getAbsolutePath())
-                            .build());
-
-                    chooserDialog.show(((Activity) view.getContext()).getFragmentManager(), null);
-                    currentReturn = new onDirReturn() {
-                        @Override
-                        void onReturn(String dir) {
-                            if (story.copyTo(dir)) {
-                                Toast.makeText(view.getContext(), "Moved to '" + dir + "'...", Toast.LENGTH_SHORT).show();
-                            }
-                        }
-                    };
-                }
-            });
+            if (s.p_total > 0) {
+                s.progress.showProgress(s.p_total, s.p_state);
+            }
 
             action_update.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     s.putDownload();
+                }
+            });
+
+            actions.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
+                @Override
+                public boolean onMenuItemClick(MenuItem item) {
+                    switch (item.getItemId()) {
+                        case R.id.export_story:
+                            if (checkStoragePerms(a)) {
+                                chooserDialog = DirectoryChooserFragment.newInstance(DirectoryChooserConfig.builder()
+                                        .newDirectoryName("Stories")
+                                        .allowReadOnlyDirectory(false)
+                                        .allowNewDirectoryNameModification(true)
+                                        .initialDirectory(Environment.getExternalStorageDirectory().getAbsolutePath())
+                                        .build());
+
+                                Log.d(TAG, "onMenuItemClick: Opening on " + Environment.getExternalStorageDirectory().getAbsolutePath());
+
+                                chooserDialog.show(((Activity) view.getContext()).getFragmentManager(), null);
+                                currentReturn = new onDirReturn() {
+                                    @Override
+                                    void onReturn(String dir) {
+                                        if (story.copyTo(dir)) {
+                                            Toast.makeText(view.getContext(), "Moved to '" + dir + "'...", Toast.LENGTH_SHORT).show();
+                                        }
+                                    }
+                                };
+                                return true;
+                            }
+                    }
+                    return false;
+                }
+            });
+
+            view.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Toast.makeText(v.getContext(), "Clicked " + s.info.title, Toast.LENGTH_SHORT).show();
                 }
             });
         }
@@ -629,9 +678,11 @@ public class HomeScreen extends RecyclerView.Adapter<HomeScreenHelp.CategorisedV
                 switch (s.getState()) {
                     case Story.DOWNLOADED:
                     case Story.DOWNLOADING:
+                        Log.d(TAG, "StoryManager: update not ready for " + s);
                         downloadeding.add(s);
                         break;
                     case Story.UPDATE_READY:
+                        Log.d(TAG, "StoryManager: update ready for " + s);
                         updates.add(s);
                         break;
                 }
