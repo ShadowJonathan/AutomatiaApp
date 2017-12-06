@@ -16,7 +16,7 @@ public abstract class MessageQueue {
     private ToughStack<String> queue;
 
     MessageQueue(Context context) {
-        queue = new ToughStack<String>(context);
+        queue = new ToughStack<>(context);
         queue.restore();
     }
 

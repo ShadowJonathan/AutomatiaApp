@@ -9,7 +9,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class Stamps {
-    private HashMap<String, ArchReg> map = new HashMap<String, ArchReg>();
+    private HashMap<String, ArchReg> map = new HashMap<>();
 
     private ArchReg get(String key) {
         if (map.containsKey(key))

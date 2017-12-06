@@ -2,7 +2,6 @@ package com.github.shadowjonathan.automatiaapp.web;
 
 import android.os.AsyncTask;
 
-import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.ResponseHandler;
 import org.apache.http.client.methods.HttpGet;
@@ -28,8 +27,6 @@ public class WebReader extends AsyncTask<String, String, String> {
         System.out.println(params[0]);
         try {
             result = client.execute(request, responseHandler);
-        } catch (ClientProtocolException e) {
-            e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
         }

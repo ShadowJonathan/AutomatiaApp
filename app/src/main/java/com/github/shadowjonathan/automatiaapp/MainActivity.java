@@ -1,18 +1,21 @@
 package com.github.shadowjonathan.automatiaapp;
 
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.IBinder;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AlertDialog;
@@ -36,7 +39,6 @@ import com.github.shadowjonathan.automatiaapp.ffnet.select.FFNetCategorySelectAc
 import com.github.shadowjonathan.automatiaapp.global.DirListener;
 import com.github.shadowjonathan.automatiaapp.global.HomeScreenHelp;
 
-import net.rdrei.android.dirchooser.DirectoryChooserConfig;
 import net.rdrei.android.dirchooser.DirectoryChooserFragment;
 
 public class MainActivity extends AppCompatActivity
@@ -48,6 +50,7 @@ public class MainActivity extends AppCompatActivity
     private Operator OPS;
     private Comms C;
     private Modules M;
+    private BroadcastReceiver mMessageReceiver;
     private ServiceConnection mConnection = new ServiceConnection() {
         private String TAG = "OPS_CONN";
 
@@ -124,6 +127,15 @@ public class MainActivity extends AppCompatActivity
         navigationView.setNavigationItemSelectedListener(this);
         navigationView.getMenu().getItem(0).setChecked(true);
 
+        mMessageReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                String mess = intent.getStringExtra(Modules.EXTRA_RETURN_MESSAGE);
+                if (getCurrentFocus() != null)
+                    Snackbar.make(getCurrentFocus(), mess, Snackbar.LENGTH_LONG);
+            }
+        };
+
         Log.d(TAG, "+++ ON CREATE +++");
     }
 
@@ -138,6 +150,9 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void onResume() {
         super.onResume();
+
+        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiver, new IntentFilter("EVENT_SNACKBAR"));
+
         Log.d(TAG, "+ ON RESUME +");
     }
 
@@ -222,6 +237,7 @@ public class MainActivity extends AppCompatActivity
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.main, menu);
+        menu.findItem(R.id.action_settings).setEnabled(false);
         return true;
     }
 
@@ -233,24 +249,7 @@ public class MainActivity extends AppCompatActivity
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        } else if (id == R.id.action_debug) {
-            chooserDialog = DirectoryChooserFragment.newInstance(DirectoryChooserConfig.builder()
-                    .newDirectoryName("Stories")
-                    .allowReadOnlyDirectory(false)
-                    .allowNewDirectoryNameModification(true)
-                    .initialDirectory(Environment.getExternalStorageDirectory().getAbsolutePath())
-                    .build());
-
-            Log.d(TAG, "onOptionsItemSelected: " + Environment.getExternalStorageDirectory());
-
-            chooserDialog.show(getFragmentManager(), null);
-
-        } else if (id == R.id.action_ffnet) {
-            openFFNET();
-            return true;
-        }
+        if (id == R.id.action_settings) return true;
         return super.onOptionsItemSelected(item);
     }
 

@@ -6,6 +6,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.github.shadowjonathan.automatiaapp.background.Modules;
 import com.github.shadowjonathan.automatiaapp.global.Helper;
@@ -23,7 +24,7 @@ import java.util.Map;
 import static com.github.shadowjonathan.automatiaapp.ffnet.Category.Categories;
 
 public class Archive {
-    private static Map<String, Archive> Archives = new HashMap<String, Archive>();
+    private static Map<String, Archive> Archives = new HashMap<>();
     private static String TAG = "ARCHIVE";
     public String name;
     public Registry reg;
@@ -82,9 +83,9 @@ public class Archive {
                 .i("category", this.Cat.name);
     }
 
-    public boolean refresh() {
+    public boolean refresh(RegistryUpdateCallback r) {
         if (!refreshing) {
-            getRegistry();
+            getRegistry(r);
             refreshing = true;
         } else
             return false;
@@ -103,6 +104,7 @@ public class Archive {
         getRegistry();
         if (ffnet.isOnline()) {
             regListener.onUpdate("Contacting server...");
+            Toast.makeText(ffnet.getContext(), "Downloading the registry can take a while, please wait.", Toast.LENGTH_LONG).show();
         } else {
             regListener.onUpdate("Request queued, please come online.");
         }
@@ -123,7 +125,7 @@ public class Archive {
                     public void run() {
                         try {
                             JSONObject rawreg = o.getJSONObject("registry");
-                            ArrayList<JSONObject> reglist = new ArrayList<JSONObject>();
+                            ArrayList<JSONObject> reglist = new ArrayList<>();
                             for (Iterator<String> it = rawreg.keys(); it.hasNext(); ) {
                                 reglist.add(rawreg.getJSONObject(it.next()));
                             }
@@ -237,7 +239,7 @@ public class Archive {
         }
 
         public static ArrayList<Archive> getAll() {
-            ArrayList<Archive> list = new ArrayList<Archive>();
+            ArrayList<Archive> list = new ArrayList<>();
             Cursor cursor = DB.getReadableDatabase().query(
                     PinContract.PinEntry.TABLE_NAME,
                     new String[]{

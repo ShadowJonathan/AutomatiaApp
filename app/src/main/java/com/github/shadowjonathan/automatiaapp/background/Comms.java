@@ -33,6 +33,7 @@ public class Comms {
     public static final URI AUTOMATIA_URL;
     private static final String WSTAG = "NETWORK/WS";
     private static final int online_n_id = 9001;
+    public static boolean online;
 
     static {
         URI tmp = null;
@@ -58,7 +59,6 @@ public class Comms {
     private Modules M;
     private ConnectivityManager cm;
     private Context app_context;
-    private boolean online;
     private Timer connect_timer = new Timer();
     private MessageQueue messages;
     private TimerTask tt = new TimerTask() {
@@ -145,7 +145,7 @@ public class Comms {
                                     .setSmallIcon(this.isOnline() ? R.drawable.ic_wifi : R.drawable.ic_wifi_off)
                                     .setContentTitle(this.isOnline() ? "Online" : "Offline")
                                     .setContentText(
-                                            this.online ?
+                                            online ?
                                                     "For " + Helper.TSUtils.millisToLongDHMS(new Date().getTime() - latestOffline.getTime()) :
                                                     // "(UUID: " + getUUID() + ")"
                                                     latestOnline == null ?
@@ -172,11 +172,11 @@ public class Comms {
 
     // NETWORK
     private void onNetworkChange(boolean online) {
-        if (this.online != online) {
-            if (!this.online)
+        if (Comms.online != online) {
+            if (!Comms.online)
                 latestOffline = new Date();
         }
-        this.online = online;
+        Comms.online = online;
         if (!online) {
             if (ws != null)
                 ws.close();
@@ -190,7 +190,7 @@ public class Comms {
     }
 
     public boolean isOnline() {
-        return this.online && ws != null && ws.getReadyState() == WebSocket.READYSTATE.OPEN;
+        return online && ws != null && ws.getReadyState() == WebSocket.READYSTATE.OPEN;
     }
 
     private WebSocketClient newWS() {

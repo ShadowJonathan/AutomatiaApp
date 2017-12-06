@@ -156,7 +156,7 @@ public class Registry {
         }
 
         public Map<String, RegistryEntry> toMap() {
-            Map<String, RegistryEntry> m = new HashMap<String, RegistryEntry>();
+            Map<String, RegistryEntry> m = new HashMap<>();
             for (RegistryEntry e : this) {
                 m.put(e.storyID, e);
             }
@@ -284,7 +284,7 @@ public class Registry {
         }
 
         private ArrayList<String> toList(JSONArray a) throws JSONException {
-            ArrayList<String> l = new ArrayList<String>();
+            ArrayList<String> l = new ArrayList<>();
             for (int i = 0; i < a.length(); i++) {
                 l.add(a.get(i).toString());
             }

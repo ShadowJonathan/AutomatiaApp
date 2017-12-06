@@ -7,7 +7,7 @@ import java.util.List;
 
 public abstract class Filter {
     public static void sort(List<Registry.RegistryEntry> list, FilterAble filter) {
-        List<Registry.RegistryEntry> oldlist = new ArrayList<Registry.RegistryEntry>(list);
+        List<Registry.RegistryEntry> oldlist = new ArrayList<>(list);
         list.clear();
         for (Registry.RegistryEntry e : oldlist) {
             if (filter.match(e)) {

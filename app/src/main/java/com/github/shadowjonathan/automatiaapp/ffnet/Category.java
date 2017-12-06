@@ -22,8 +22,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class Category {
-    public static Map<String, Category> Categories = new HashMap<String, Category>();
-    private static Map<String, String> RealNames = new HashMap<String, String>();
+    public static Map<String, Category> Categories = new HashMap<>();
+    private static Map<String, String> RealNames = new HashMap<>();
     private static String TAG = "CATEGORY";
 
     static {
@@ -38,7 +38,7 @@ public class Category {
     }
 
     public String name;
-    private Map<String, Archive> Archives = new HashMap<String, Archive>();
+    private Map<String, Archive> Archives = new HashMap<>();
     private Modules.FFnet ffnet;
     private ArrayList<String> ArchiveNames;
 
@@ -73,7 +73,7 @@ public class Category {
     }
 
     public static List<Category> getList() {
-        return new ArrayList<Category>(Categories.values());
+        return new ArrayList<>(Categories.values());
     }
 
     public static String findCat(String archive) {
@@ -151,7 +151,7 @@ public class Category {
                 null
         );
 
-        ArrayList<String> ArchiveNames = new ArrayList<String>();
+        ArrayList<String> ArchiveNames = new ArrayList<>();
         while (cursor.moveToNext()) {
             //Log.v(TAG, "getArchiveNames: getting url "+cursor.getString(cursor.getColumnIndex(CategoryContract.CatEntry.COLUMN_NAME_URL)));
             Matcher m = Pattern.compile("/?(\\w+?)/(.*?)/?", Pattern.CASE_INSENSITIVE).matcher(cursor.getString(cursor.getColumnIndex(CategoryContract.CatEntry.COLUMN_NAME_URL)));
@@ -189,7 +189,7 @@ public class Category {
                 null
         );
 
-        ArrayList<ArchiveRef> Archives = new ArrayList<ArchiveRef>();
+        ArrayList<ArchiveRef> Archives = new ArrayList<>();
         while (cursor.moveToNext()) {
             Archives.add(new ArchiveRef(
                             cursor.getString(cursor.getColumnIndex(CategoryContract.CatEntry.COLUMN_NAME_URL)),

@@ -40,26 +40,23 @@ public final class Helper {
 
     public static Date parseDate(String s) {
         try {
-            return new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSSSSXXX").parse(s);
-        } catch (ParseException ignored) {
-
-        }
-        try {
-            return new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX").parse(s);
-        } catch (ParseException ignored) {
-
+            return new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSSSSXXX", Locale.getDefault()).parse(s);
+        } catch (IllegalArgumentException | ParseException ignored) {
         }
 
         try {
-            return new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX").parse(s);
-        } catch (ParseException ignored) {
-
+            return new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX", Locale.getDefault()).parse(s);
+        } catch (ParseException | IllegalArgumentException ignored) {
         }
 
         try {
-            return new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").parse(s);
-        } catch (ParseException ignored) {
+            return new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX", Locale.getDefault()).parse(s);
+        } catch (ParseException | IllegalArgumentException ignored) {
+        }
 
+        try {
+            return new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault()).parse(s);
+        } catch (ParseException | IllegalArgumentException ignored) {
         }
 
         Log.w(TAG, "parseDate: date will not parse: " + s);
@@ -68,7 +65,7 @@ public final class Helper {
     }
 
     public static ArrayList<JSONObject> makeObjects(JSONArray a) throws JSONException {
-        ArrayList<JSONObject> list = new ArrayList<JSONObject>();
+        ArrayList<JSONObject> list = new ArrayList<>();
         for (int i = 0; i < a.length(); i++) {
             list.add(a.getJSONObject(i));
         }
@@ -94,8 +91,6 @@ public final class Helper {
             OutputStreamWriter outputStreamWriter = new OutputStreamWriter(context.openFileOutput("messageStack.json", Context.MODE_PRIVATE));
             outputStreamWriter.write(data);
             outputStreamWriter.close();
-        } catch (FileNotFoundException e) {
-            Log.e("Exception", "File write failed: ", e);
         } catch (IOException e) {
             Log.e("Exception", "File write failed: ", e);
         }

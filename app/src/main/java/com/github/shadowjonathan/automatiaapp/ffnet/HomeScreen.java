@@ -25,6 +25,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.github.shadowjonathan.automatiaapp.R;
+import com.github.shadowjonathan.automatiaapp.background.Comms;
 import com.github.shadowjonathan.automatiaapp.ffnet.select.ArchiveFragment;
 import com.github.shadowjonathan.automatiaapp.ffnet.select.FFNetCategorySelectActivity;
 import com.github.shadowjonathan.automatiaapp.ffnet.select.FFNetStorySelectActivity;
@@ -438,10 +439,6 @@ public class HomeScreen extends RecyclerView.Adapter<HomeScreenHelp.CategorisedV
                 }
             });
 
-            if (s.p_total > 0) {
-                s.progress.showProgress(s.p_total, s.p_state);
-            }
-
             action_update.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -475,6 +472,9 @@ public class HomeScreen extends RecyclerView.Adapter<HomeScreenHelp.CategorisedV
                                 };
                                 return true;
                             }
+                        case R.id.redownload_story:
+                            s.putDownload();
+                            return true;
                     }
                     return false;
                 }
@@ -486,6 +486,8 @@ public class HomeScreen extends RecyclerView.Adapter<HomeScreenHelp.CategorisedV
                     Toast.makeText(v.getContext(), "Clicked " + s.info.title, Toast.LENGTH_SHORT).show();
                 }
             });
+
+            if (s.p_total > 0 && Comms.online) s.progress.showProgress(s.p_total, s.p_state);
         }
 
         @Override

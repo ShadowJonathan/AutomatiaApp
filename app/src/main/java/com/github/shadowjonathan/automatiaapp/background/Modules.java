@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.support.v4.content.LocalBroadcastManager;
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.github.shadowjonathan.automatiaapp.ffnet.Archive;
@@ -23,6 +24,7 @@ import org.json.JSONObject;
 import static com.github.shadowjonathan.automatiaapp.ffnet.Category.Categories;
 
 public class Modules {
+    public static final String EXTRA_RETURN_MESSAGE = "EXTRA_RETURN_MESSAGE";
     public static FFnet ffnet;
     private static String TAG = "MODULES";
     protected GlobalDBhelper GDB;
@@ -36,6 +38,15 @@ public class Modules {
         Downloads.bindDB(getGDB());
 
         ffnet = new FFnet();
+    }
+
+    public void sendSnackBar(String message) {
+        Intent it = new Intent("EVENT_SNACKBAR");
+
+        if (!TextUtils.isEmpty(message))
+            it.putExtra(EXTRA_RETURN_MESSAGE, message);
+
+        LocalBroadcastManager.getInstance(app_context).sendBroadcast(it);
     }
 
     void BindComms(Comms c) {
@@ -186,6 +197,10 @@ public class Modules {
             if (DB != null) {
                 DB.close();
             }
+        }
+
+        public Modules getModules() {
+            return Modules.this;
         }
     }
 }

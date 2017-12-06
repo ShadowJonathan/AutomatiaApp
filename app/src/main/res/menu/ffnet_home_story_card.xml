@@ -4,4 +4,8 @@
     <item
         android:id="@+id/export_story"
         android:title="@string/export_story" />
+
+    <item
+        android:id="@+id/redownload_story"
+        android:title="@string/re_download" />
 </menu>

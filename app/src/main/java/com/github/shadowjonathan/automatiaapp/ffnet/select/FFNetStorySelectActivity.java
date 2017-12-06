@@ -149,7 +149,17 @@ public class FFNetStorySelectActivity extends AppCompatActivity implements Story
                 openSort();
                 return true;
             case R.id.action_refresh:
-                if (archive.refresh())
+                if (archive.refresh(new Archive.RegistryUpdateCallback() {
+                    @Override
+                    public void onUpdate(String text) {
+
+                    }
+
+                    @Override
+                    public void run() {
+                        FFNetStorySelectActivity.this.onRefresh();
+                    }
+                }))
                     Toast.makeText(this, "Queried refresh", Toast.LENGTH_SHORT).show();
                 else
                     Toast.makeText(this, "Refresh already queried", Toast.LENGTH_SHORT).show();
@@ -181,22 +191,27 @@ public class FFNetStorySelectActivity extends AppCompatActivity implements Story
 
     @Override
     public void onRefresh() {
-        Log.d(TAG, "onRefresh: Called refresh");
-        swipe.setRefreshing(true);
-        new Thread(new Runnable() {
+        runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                final Registry.RegistryList items = archive.reg.getList();
-                runOnUiThread(new Runnable() {
+                Log.d(TAG, "onRefresh: Called refresh");
+                swipe.setRefreshing(true);
+                new Thread(new Runnable() {
                     @Override
                     public void run() {
-                        FFNetStorySelectActivity.this.items = items;
-                        sortList();
-                        swipe.setRefreshing(false);
+                        final Registry.RegistryList items = archive.reg.getList();
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                FFNetStorySelectActivity.this.items = items;
+                                sortList();
+                                swipe.setRefreshing(false);
+                            }
+                        });
                     }
-                });
+                }).start();
             }
-        }).start();
+        });
     }
 
     public void onInitRefresh() {

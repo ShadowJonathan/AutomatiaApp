@@ -106,7 +106,7 @@ public class StoryFragment extends Fragment {
 
         StoryRecyclerAdapter(List<Registry.RegistryEntry> items, OnStoryTapListener listener, Context context) {
             mValues = items;
-            allValues = new ArrayList<Registry.RegistryEntry>(items);
+            allValues = new ArrayList<>(items);
             mListener = listener;
             this.context = context;
         }

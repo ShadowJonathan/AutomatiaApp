@@ -98,7 +98,7 @@ public class ArchiveFragment extends Fragment {
 
         public ArchiveRecyclerAdapter(List<Category.ArchiveRef> items, OnArchiveTapListener listener) {
             mValues = items;
-            allValues = new ArrayList<Category.ArchiveRef>(items);
+            allValues = new ArrayList<>(items);
             mListener = listener;
         }
 

@@ -9,10 +9,11 @@
             android:icon="@drawable/ffneticon"
             android:title="@string/menu_ffnet" />
 
-        <item
+        <!--<item
             android:id="@+id/nav_youtube"
             android:icon="@drawable/youtubeicon"
-            android:title="@string/menu_youtube" />
+            android:enabled="false"
+            android:title="@string/menu_youtube" />-->
         <!--<item
             android:id="@+id/nav_gallery"
             android:icon="@drawable/ic_menu_gallery"

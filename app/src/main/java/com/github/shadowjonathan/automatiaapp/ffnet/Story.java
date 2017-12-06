@@ -26,13 +26,12 @@ import java.util.Map;
 
 import static com.github.shadowjonathan.automatiaapp.background.Modules.ffnet;
 
-// TODO MAKE STORIES DOWNLOADABLE AND PUT THEM ON UPDATED LIST OR SOMETHING
 public class Story {
     public static final int UNDOWNLOADED = 0;
     public static final int DOWNLOADED = 1337;
     public static final int DOWNLOADING = 9001;
     public static final int UPDATE_READY = 42;
-    private static Map<String, Story> Stories = new HashMap<String, Story>();
+    private static Map<String, Story> Stories = new HashMap<>();
     private static String TAG = "STORY";
     public String ID;
     public Registry.RegistryEntry info;
@@ -67,7 +66,7 @@ public class Story {
     }
 
     public static ArrayList<Story> getList() {
-        ArrayList<Story> list = new ArrayList<Story>();
+        ArrayList<Story> list = new ArrayList<>();
         SQLiteDatabase Db = ffnet.getDB().getReadableDatabase();
 
         String[] projection = {
@@ -315,7 +314,7 @@ public class Story {
     private void showProgress(int total, int progress) {
         if (progress > p_state) {
             p_state = progress;
-            p_total = 0;
+            p_total = total;
             if (this.progress != null)
                 this.progress.showProgress(total, progress);
         }

@@ -134,4 +134,5 @@
     <string name="name_status">Status:</string>
     <string name="name_query_download">Query download</string>
     <string name="export_story">Export Story</string>
+    <string name="re_download">Re-Download</string>
 </resources>

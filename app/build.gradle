@@ -36,10 +36,10 @@ android {
     buildToolsVersion '26.0.2'
     defaultConfig {
         applicationId "com.github.shadowjonathan.automatiaapp"
-        minSdkVersion 22
+        minSdkVersion 21
         targetSdkVersion 25
-        versionCode 1
-        versionName "0.1"
+        versionCode 3
+        versionName '0.1.1-ALPHA'
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
 
         javaCompileOptions {
@@ -59,8 +59,8 @@ android {
             debuggable true
         }
     }
-
     useLibrary 'org.apache.http.legacy'
-
     dataBinding.enabled = true
+    productFlavors {
+    }
 }

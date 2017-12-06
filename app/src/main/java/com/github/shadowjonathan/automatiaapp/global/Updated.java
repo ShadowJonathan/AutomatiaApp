@@ -22,7 +22,7 @@ public class Updated {
     }
 
     public static ArrayList<UpdateTag> getAll() {
-        ArrayList<UpdateTag> list = new ArrayList<UpdateTag>();
+        ArrayList<UpdateTag> list = new ArrayList<>();
         Cursor cursor = DB.getReadableDatabase().query(
                 UpdateContract.UdEntry.TABLE_NAME,
                 new String[]{
